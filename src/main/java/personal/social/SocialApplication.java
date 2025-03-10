@@ -26,20 +26,6 @@ public class SocialApplication implements CommandLineRunner {
 	}
 	@Override
 	public void run(String... args) throws Exception {
-		// add admin user
 
-		if(userRepo.findByEmail("admin") == null) {
-			User adminUser = new User();
-			adminUser.setEmail("admin");
-			adminUser.setPassword("12345");
-			adminUser.setFirst_name("Hồ");
-			adminUser.setSurname("Quốc");
-			adminUser.setLast_name("Việt");
-			adminUser.setPhone("0000000000");
-			adminUser.setDob(LocalDate.parse("2000-01-01"));
-			adminUser.setCreated_at(LocalDateTime.now());
-			adminUser.setRole(Role.ADMIN);
-			userRepo.save(adminUser);
-		}
 	}
 }
