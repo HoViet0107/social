@@ -3,6 +3,9 @@ package personal.social.services.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import personal.social.config.JwtUtil;
+import personal.social.dto.AuthResponse;
+import personal.social.dto.UserDTO;
 import personal.social.enums.Role;
 import personal.social.model.User;
 import personal.social.repository.UserRepository;
@@ -15,11 +18,29 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepo;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepo) {
+    public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepo, JwtUtil jwtUtil) {
         this.passwordEncoder = passwordEncoder;
         this.userRepo = userRepo;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @Override
+    public AuthResponse login(UserDTO userDTO) {
+        User existedUser = userRepo.findByEmail(userDTO.getEmail());
+        if(existedUser == null) {
+            throw new RuntimeException("User not found!");
+        }
+        if(!passwordEncoder.matches(userDTO.getPassword(), existedUser.getPassword())) {
+            throw new RuntimeException("Invalid password!");
+        }
+
+        // generate token
+        String token = jwtUtil.generateToken(userDTO.getEmail());
+        AuthResponse authResponse = new AuthResponse(token, "Login successfully!");
+        return authResponse;
     }
 
     @Override
