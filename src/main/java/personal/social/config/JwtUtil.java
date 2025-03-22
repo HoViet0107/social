@@ -52,7 +52,7 @@ public class JwtUtil {
         return email.equals(extractEmail(token)) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpired(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
