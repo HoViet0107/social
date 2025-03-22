@@ -1,6 +1,7 @@
 package personal.social.model;
 
 import jakarta.persistence.*;
+import personal.social.enums.Status;
 
 import java.time.LocalDateTime;
 
@@ -15,7 +16,7 @@ public class Post {
     private LocalDateTime last_updated;
 
     @Enumerated(EnumType.STRING)
-    private String status;
+    private Status status;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -24,7 +25,7 @@ public class Post {
     public Post() {
     }
 
-    public Post(Integer post_id, LocalDateTime created_at, LocalDateTime last_updated, String status, User user) {
+    public Post(Integer post_id, LocalDateTime created_at, LocalDateTime last_updated, Status status, User user) {
         this.post_id = post_id;
         this.created_at = created_at;
         this.last_updated = last_updated;
@@ -56,11 +57,11 @@ public class Post {
         this.last_updated = last_updated;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
