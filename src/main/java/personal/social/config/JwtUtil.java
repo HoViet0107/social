@@ -4,9 +4,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
+
 import io.jsonwebtoken.Jwts;
 
 import io.jsonwebtoken.security.Keys;
+import personal.social.enums.RoleEnum;
 
 @Component
 public class JwtUtil {
@@ -17,11 +20,12 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, List<RoleEnum> authorityStrings) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .claim("authorities", authorityStrings)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -6,25 +6,30 @@ import org.springframework.stereotype.Service;
 import personal.social.config.JwtUtil;
 import personal.social.dto.AuthResponse;
 import personal.social.dto.UserDTO;
-import personal.social.enums.Role;
+import personal.social.enums.RoleEnum;
+import personal.social.model.Roles;
 import personal.social.model.User;
+import personal.social.repository.RoleRepository;
 import personal.social.repository.UserRepository;
 import personal.social.services.UserService;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepo;
+    private final RoleRepository roleRepos;
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepo, JwtUtil jwtUtil) {
+    public UserServiceImpl(PasswordEncoder passwordEncoder, UserRepository userRepo, JwtUtil jwtUtil, RoleRepository roleRepos) {
         this.passwordEncoder = passwordEncoder;
         this.userRepo = userRepo;
         this.jwtUtil = jwtUtil;
+        this.roleRepos = roleRepos;
     }
 
     @Override
@@ -36,9 +41,14 @@ public class UserServiceImpl implements UserService {
         if(!passwordEncoder.matches(userDTO.getPassword(), existedUser.getPassword())) {
             throw new RuntimeException("Invalid password!");
         }
+        List<Roles> roles = roleRepos.findByUser(existedUser);
+        if(roles.size() == 0) {
+            throw new RuntimeException("Role not found!");
+        }
+        List<RoleEnum> roleNames = roles.stream().map(Roles::getRole).toList();
 
         // generate token
-        String token = jwtUtil.generateToken(userDTO.getEmail());
+        String token = jwtUtil.generateToken(userDTO.getEmail(), roleNames);
         AuthResponse authResponse = new AuthResponse(token, "Login successfully!");
         return authResponse;
     }
@@ -58,8 +68,12 @@ public class UserServiceImpl implements UserService {
         }
         // encrypt password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setCreated_at(LocalDateTime.now());
-        user.setRole(Role.USER);
+        user.setCreatedAt(LocalDateTime.now());
+        // save role
+        Roles role = new Roles();
+        role.setRole(RoleEnum.USER);
+        role.setUser(user);
+        roleRepos.save(role);
         // save user
         return userRepo.save(user);
     }

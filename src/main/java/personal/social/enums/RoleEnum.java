@@ -1,6 +1,6 @@
 package personal.social.enums;
 
-public enum Role {
+public enum RoleEnum {
     ADMIN, USER
 }
 
