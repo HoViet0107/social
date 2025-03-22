@@ -7,23 +7,33 @@ import java.time.LocalDateTime;
 public class PostContent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer post_content_id;
+    private Integer postContentId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content; // post content
 
-    private LocalDateTime updated_at;
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
-    public Integer getPost_content_id() {
-        return post_content_id;
+    public PostContent() {
     }
 
-    public void setPost_content_id(Integer post_content_id) {
-        this.post_content_id = post_content_id;
+    public PostContent(Integer postContentId, String content, LocalDateTime updatedAt, Post post) {
+        this.postContentId = postContentId;
+        this.content = content;
+        this.updatedAt = updatedAt;
+        this.post = post;
+    }
+
+    public Integer getPostContentId() {
+        return postContentId;
+    }
+
+    public void setPostContentId(Integer postContentId) {
+        this.postContentId = postContentId;
     }
 
     public String getContent() {
@@ -34,12 +44,12 @@ public class PostContent {
         this.content = content;
     }
 
-    public LocalDateTime getUpdated_at() {
-        return updated_at;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdated_at(LocalDateTime updated_at) {
-        this.updated_at = updated_at;
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Post getPost() {
@@ -48,15 +58,5 @@ public class PostContent {
 
     public void setPost(Post post) {
         this.post = post;
-    }
-
-    public PostContent(Integer post_content_id, String content, LocalDateTime updated_at, Post post) {
-        this.post_content_id = post_content_id;
-        this.content = content;
-        this.updated_at = updated_at;
-        this.post = post;
-    }
-
-    public PostContent() {
     }
 }

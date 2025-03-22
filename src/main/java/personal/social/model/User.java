@@ -1,8 +1,6 @@
 package personal.social.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import personal.social.enums.Role;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,7 +9,7 @@ import java.time.LocalDateTime;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer user_id;
+    private Integer userId;
 
     @Column(columnDefinition = "VARCHAR(155)", unique = true, nullable = false)
     private String email;
@@ -20,12 +18,12 @@ public class User {
     private String password;
 
     @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
-    private String first_name;
+    private String firstName;
     @Column(columnDefinition = "NVARCHAR(255)")
     private String surname;
 
     @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
-    private String last_name;
+    private String lastName;
 
     @Column(columnDefinition = "VARCHAR(12)", unique = true)
     private String phone;
@@ -34,29 +32,29 @@ public class User {
     private LocalDate dob;
 
     @Column(columnDefinition = "TIMESTAMP")
-    private LocalDateTime created_at;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    private LocalDateTime createdAt;
 
     public User() {
     }
 
-    public User(Integer user_id, String email, String password, String first_name, String surname, String last_name, String phone, LocalDate dob, LocalDateTime created_at, Role role) {
-        this.user_id = user_id;
+    public User(Integer userId, String email, String password, String firstName, String surname, String lastName, String phone, LocalDate dob, LocalDateTime createdAt) {
+        this.userId = userId;
         this.email = email;
         this.password = password;
-        this.first_name = first_name;
+        this.firstName = firstName;
         this.surname = surname;
-        this.last_name = last_name;
+        this.lastName = lastName;
         this.phone = phone;
         this.dob = dob;
-        this.created_at = created_at;
-        this.role = role;
+        this.createdAt = createdAt;
     }
 
-    public void setUser_id(Integer user_id) {
-        this.user_id = user_id;
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public String getEmail() {
@@ -75,12 +73,12 @@ public class User {
         this.password = password;
     }
 
-    public String getFirst_name() {
-        return first_name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirst_name(String first_name) {
-        this.first_name = first_name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getSurname() {
@@ -91,12 +89,12 @@ public class User {
         this.surname = surname;
     }
 
-    public String getLast_name() {
-        return last_name;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getPhone() {
@@ -115,19 +113,13 @@ public class User {
         this.dob = dob;
     }
 
-    public LocalDateTime getCreated_at() {
-        return created_at;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreated_at(LocalDateTime created_at) {
-        this.created_at = created_at;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public Role getRole() {
-        return role;
-    }
 
-    public void setRole(Role role) {
-        this.role = role;
-    }
 }

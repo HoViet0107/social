@@ -9,11 +9,11 @@ import java.time.LocalDateTime;
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer post_id;
+    private Integer postId;
 
-    private LocalDateTime created_at;
+    private LocalDateTime createdAt;
 
-    private LocalDateTime last_updated;
+    private LocalDateTime lastUpdated;
 
     @Enumerated(EnumType.STRING)
     private Status status;
@@ -25,36 +25,36 @@ public class Post {
     public Post() {
     }
 
-    public Post(Integer post_id, LocalDateTime created_at, LocalDateTime last_updated, Status status, User user) {
-        this.post_id = post_id;
-        this.created_at = created_at;
-        this.last_updated = last_updated;
+    public Post(Integer postId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status status, User user) {
+        this.postId = postId;
+        this.createdAt = createdAt;
+        this.lastUpdated = lastUpdated;
         this.status = status;
         this.user = user;
     }
 
-    public Integer getPost_id() {
-        return post_id;
+    public Integer getPostId() {
+        return postId;
     }
 
-    public void setPost_id(Integer post_id) {
-        this.post_id = post_id;
+    public void setPostId(Integer postId) {
+        this.postId = postId;
     }
 
-    public LocalDateTime getCreated_at() {
-        return created_at;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreated_at(LocalDateTime created_at) {
-        this.created_at = created_at;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public LocalDateTime getLast_updated() {
-        return last_updated;
+    public LocalDateTime getLastUpdated() {
+        return lastUpdated;
     }
 
-    public void setLast_updated(LocalDateTime last_updated) {
-        this.last_updated = last_updated;
+    public void setLastUpdated(LocalDateTime lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 
     public Status getStatus() {
