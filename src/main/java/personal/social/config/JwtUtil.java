@@ -30,7 +30,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String extractUsername(String token) {
+    public String extractEmail(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
@@ -39,8 +39,17 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    public List extractRoles(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("roles", List.class);  // Lấy danh sách quyền
+    }
+
     public boolean validateToken(String token, String email) {
-        return email.equals(extractUsername(token)) && !isTokenExpired(token);
+        return email.equals(extractEmail(token)) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
