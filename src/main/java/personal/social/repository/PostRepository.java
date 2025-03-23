@@ -18,7 +18,8 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query(value = "SELECT new personal.social.dto.PostDTO(p.postId, p.createdAt, p.lastUpdated, " +
             "p.status, pc.content, p.user.userId) " +
             "FROM Post p " +
-            "JOIN PostContent pc ON p.lastUpdated = pc.updatedAt")
+            "JOIN PostContent pc ON p.lastUpdated = pc.updatedAt " +
+            "WHERE p.status = 'ACTIVE'")
     Page<PostDTO> findAllPosts(Pageable pageable);
 
     Page<Post> findByUser(User user, Pageable pageable);
