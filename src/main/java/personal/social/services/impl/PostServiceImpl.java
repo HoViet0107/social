@@ -62,8 +62,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post updatePost(Post post) {
-        return null;
+    public PostContent updatePost(PostContent postContent, User user) {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        // get existed post by post id
+        Post existedPost = postRepos.findByPostId(postContent.getPost().getPostId());
+        // set new update time
+        existedPost.setLastUpdated(currentDateTime);
+        postRepos.save(existedPost);
+        // save new post content for existedPost and return it
+        PostContent newContent = new PostContent();
+        newContent.setContent(postContent.getContent());
+        newContent.setUpdatedAt(currentDateTime);
+        newContent.setPost(existedPost);
+        return pcRepos.save(newContent);
     }
 
     @Override

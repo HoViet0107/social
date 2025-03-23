@@ -45,7 +45,7 @@ public class PostController {
         }
     }
 
-    @Operation(summary = "Tạo bài viết mới", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Create new post", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping
     public ResponseEntity<?> createPost(
             @RequestBody PostContent postContent,
@@ -53,7 +53,7 @@ public class PostController {
         // extract token
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // Cắt bỏ "Bearer "
+            token = token.substring(7); // get token without "Bearer "
         } else {
             throw new RuntimeException("Missing or invalid Authorization header");
         }
@@ -72,4 +72,29 @@ public class PostController {
         }
 
     }
+
+    @PutMapping
+    public ResponseEntity<?> updatePost(
+        @RequestBody PostContent postContent,
+        HttpServletRequest request){
+        // extract token
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // get token without "Bearer "
+        } else {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+        if(jwtUtil.isTokenExpired(token)){
+            return ResponseEntity.badRequest().body("Token expired!");
+        } // end extract token
+        // get user by email
+        User user = userRepo.findByEmail(jwtUtil.extractEmail(token));
+        try{
+            // update post new content
+            return ResponseEntity.ok(postService.updatePost(postContent, user));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }
