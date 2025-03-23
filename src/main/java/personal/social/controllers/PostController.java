@@ -4,10 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import personal.social.config.JwtUtil;
+import personal.social.dto.PostDTO;
 import personal.social.model.Post;
 import personal.social.model.PostContent;
 import personal.social.model.User;
@@ -22,27 +26,25 @@ public class PostController {
     private final PostService postService;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepo;
+    private final PagedResourcesAssembler<PostDTO> pagedResourcesAssembler;
 
     @Autowired
     public PostController(
             PostService postService,
             JwtUtil jwtUtil,
-            UserRepository userRepo) {
+            UserRepository userRepo,
+            PagedResourcesAssembler<PostDTO> pagedResourcesAssembler) {
         this.postService = postService;
         this.jwtUtil = jwtUtil;
         this.userRepo = userRepo;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @GetMapping
-    public ResponseEntity<?> getPosts(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        try{
-            Pageable pageable = PageRequest.of(page, size);
-            return ResponseEntity.ok(postService.getAllPosts(pageable));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public PagedModel<?> getAllPosts(Pageable pageable) {
+        // use PagedModel for RESTful API
+        Page<PostDTO> posts = postService.getAllPosts(pageable);
+        return pagedResourcesAssembler.toModel(posts);
     }
 
     @Operation(summary = "Create new post", security = @SecurityRequirement(name = "bearerAuth"))
@@ -73,6 +75,7 @@ public class PostController {
 
     }
 
+    @Operation(summary = "Update post content", security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping
     public ResponseEntity<?> updatePost(
         @RequestBody PostContent postContent,
@@ -96,5 +99,4 @@ public class PostController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
 }

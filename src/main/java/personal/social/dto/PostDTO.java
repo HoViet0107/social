@@ -1,39 +1,30 @@
-package personal.social.model;
+package personal.social.dto;
 
-import jakarta.persistence.*;
 import personal.social.enums.Status;
 
 import java.time.LocalDateTime;
 
-@Entity
-public class Post {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "post_id")
+public class PostDTO {
     private Integer postId;
 
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "last_updated")
     private LocalDateTime lastUpdated;
 
-    @Enumerated(EnumType.STRING)
     private Status status;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    private String content;
 
-    public Post() {
-    }
+    private Integer userId;
 
-    public Post(Integer postId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status status, User user) {
+    public PostDTO(){}
+    public PostDTO(Integer postId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status status, String content, Integer userId) {
         this.postId = postId;
         this.createdAt = createdAt;
         this.lastUpdated = lastUpdated;
         this.status = status;
-        this.user = user;
+        this.content = content;
+        this.userId = userId;
     }
 
     public Integer getPostId() {
@@ -68,11 +59,19 @@ public class Post {
         this.status = status;
     }
 
-    public User getUser() {
-        return user;
+    public String getContent() {
+        return content;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import personal.social.dto.PostDTO;
 import personal.social.enums.Status;
 import personal.social.model.Post;
 import personal.social.model.PostContent;
@@ -52,8 +53,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Page<Post> getAllPosts(Pageable pageable) {
-        return postRepos.findAll(pageable);
+    public Page<PostDTO> getAllPosts(Pageable pageable) {
+        return postRepos.findAllPosts(pageable);
     }
 
     @Override
