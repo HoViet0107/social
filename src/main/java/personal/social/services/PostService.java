@@ -7,12 +7,14 @@ import personal.social.model.Post;
 import personal.social.model.PostContent;
 import personal.social.model.User;
 
+import java.util.Optional;
+
 public interface PostService {
     PostContent createPost(PostContent postContent, User user);
 
     Page<PostDTO> getAllPosts(Pageable pageable);
 
-    Post getPostById(Integer postId);
+    Optional<Post> getPostById(Integer postId);
 
     PostContent updatePost(PostContent postContent, User user);
 

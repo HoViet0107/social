@@ -5,14 +5,12 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import personal.social.config.JwtUtil;
 import personal.social.dto.PostDTO;
-import personal.social.model.Post;
 import personal.social.model.PostContent;
 import personal.social.model.User;
 import personal.social.repository.UserRepository;
@@ -45,6 +43,14 @@ public class PostController {
         // use PagedModel for RESTful API
         Page<PostDTO> posts = postService.getAllPosts(pageable);
         return pagedResourcesAssembler.toModel(posts);
+    }
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getPostById(@PathVariable Integer postId){
+        try{
+            return ResponseEntity.ok(postService.getPostById(postId));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @Operation(summary = "Create new post", security = @SecurityRequirement(name = "bearerAuth"))

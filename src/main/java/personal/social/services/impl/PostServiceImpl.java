@@ -14,6 +14,7 @@ import personal.social.repository.PostRepository;
 import personal.social.services.PostService;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -58,8 +59,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post getPostById(Integer postId) {
-        return null;
+    public Optional<Post> getPostById(Integer postId) {
+        return postRepos.findById(postId);
     }
 
     @Override
