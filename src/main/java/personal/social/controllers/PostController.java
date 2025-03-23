@@ -105,4 +105,29 @@ public class PostController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @Operation(summary = "Update post content", security = @SecurityRequirement(name = "bearerAuth"))
+    @PutMapping("/{postId}/status")
+    public ResponseEntity<?> updatePostStatus(
+            @PathVariable Integer postId,
+            HttpServletRequest request){
+        // extract token
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // get token without "Bearer "
+        } else {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+        if(jwtUtil.isTokenExpired(token)){
+            return ResponseEntity.badRequest().body("Token expired!");
+        } // end extract token
+        // get user by email
+        User user = userRepo.findByEmail(jwtUtil.extractEmail(token));
+        try{
+            postService.updatePostStatus(postId, user);
+            return ResponseEntity.ok().body("Status changed!");
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

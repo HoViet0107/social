@@ -18,7 +18,7 @@ public interface PostService {
 
     PostContent updatePost(PostContent postContent, User user);
 
-    void deletePost(Integer postId);
+    void updatePostStatus(Integer postId, User user);
 
 
 }

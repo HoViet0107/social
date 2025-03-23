@@ -80,7 +80,18 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void deletePost(Integer postId) {
-
+    public void updatePostStatus(Integer postId, User user) {
+        Post deletedPost = postRepos.findByPostId(postId);
+        if(deletedPost.getUser().equals(user)){
+            if(deletedPost.getStatus().equals(Status.ACTIVE)){
+                deletedPost.setStatus(Status.INACTIVE);
+                postRepos.save(deletedPost);
+            } else {
+                deletedPost.setStatus(Status.ACTIVE);
+                postRepos.save(deletedPost);
+            }
+        } else{
+            throw new RuntimeException("Permission denied!");
+        }
     }
 }
