@@ -8,11 +8,13 @@ import java.time.LocalDateTime;
 public class PostContent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_content_id")
     private Integer postContentId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content; // post content
 
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @ManyToOne

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Integer userId;
 
     @Column(columnDefinition = "VARCHAR(155)", unique = true, nullable = false)
@@ -17,12 +18,13 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
+    @Column(name = "first_name", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String firstName;
+
     @Column(columnDefinition = "NVARCHAR(255)")
     private String surname;
 
-    @Column(columnDefinition = "NVARCHAR(255)", nullable = false)
+    @Column(name = "last_name", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String lastName;
 
     @Column(columnDefinition = "VARCHAR(12)", unique = true)
@@ -31,7 +33,7 @@ public class User {
     @Column(nullable = false)
     private LocalDate dob;
 
-    @Column(columnDefinition = "TIMESTAMP")
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP")
     private LocalDateTime createdAt;
 
     public User() {

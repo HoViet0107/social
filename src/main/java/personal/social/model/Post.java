@@ -9,10 +9,13 @@ import java.time.LocalDateTime;
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "post_id")
     private Integer postId;
 
+    @Column(name = "create_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "last_updated")
     private LocalDateTime lastUpdated;
 
     @Enumerated(EnumType.STRING)
