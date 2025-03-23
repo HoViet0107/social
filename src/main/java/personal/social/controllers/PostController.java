@@ -1,5 +1,7 @@
 package personal.social.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -43,6 +45,7 @@ public class PostController {
         }
     }
 
+    @Operation(summary = "Tạo bài viết mới", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping
     public ResponseEntity<?> createPost(
             @RequestBody PostContent postContent,
