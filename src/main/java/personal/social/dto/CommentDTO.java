@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 public class CommentDTO {
     private Integer commentId;
 
-    @JsonIgnore
+    @JsonIgnore // use JsonIgnore to show create time only on response
     private LocalDateTime createdAt;
 
     @JsonIgnore
