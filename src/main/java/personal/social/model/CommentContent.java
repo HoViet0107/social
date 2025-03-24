@@ -12,7 +12,7 @@ public class CommentContent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_content_id")
-    private Integer commentContentId;
+    private Long commentContentId;
 
     @Column(columnDefinition = "VARCHAR(5000) NOT NULL")
     private String content;
@@ -32,18 +32,18 @@ public class CommentContent {
         this.comment = comment;
     }
 
-    public CommentContent(Integer commentContentId, String content, LocalDateTime lastUpdated, Comment comment) {
+    public CommentContent(Long commentContentId, String content, LocalDateTime lastUpdated, Comment comment) {
         this.commentContentId = commentContentId;
         this.content = content;
         this.lastUpdated = lastUpdated;
         this.comment = comment;
     }
 
-    public Integer getCommentContentId() {
+    public Long getCommentContentId() {
         return commentContentId;
     }
 
-    public void setCommentContentId(Integer commentContentId) {
+    public void setCommentContentId(Long commentContentId) {
         this.commentContentId = commentContentId;
     }
 

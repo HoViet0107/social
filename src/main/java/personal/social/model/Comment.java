@@ -15,7 +15,7 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
-    private Integer commentId;
+    private Long commentId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -27,9 +27,9 @@ public class Comment {
     @Column(name = "comment_status")
     private Status commentStatus;
 
-    private Integer likes=0;
+    private Long likes=0L;
 
-    private Integer dislikes=0;
+    private Long dislikes=0L;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -46,7 +46,7 @@ public class Comment {
 
     public Comment(){}
 
-    public Comment(LocalDateTime createdAt, LocalDateTime lastUpdated, Status commentStatus, Integer likes, Integer dislikes, User user, Post post, Comment parentComment) {
+    public Comment(LocalDateTime createdAt, LocalDateTime lastUpdated, Status commentStatus, Long likes, Long dislikes, User user, Post post, Comment parentComment) {
         this.createdAt = createdAt;
         this.lastUpdated = lastUpdated;
         this.commentStatus = commentStatus;
@@ -57,7 +57,7 @@ public class Comment {
         this.parentComment = parentComment;
     }
 
-    public Comment(Integer commentId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status commentStatus, Integer likes, Integer dislikes, User user, Post post, Comment parentComment) {
+    public Comment(Long commentId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status commentStatus, Long likes, Long dislikes, User user, Post post, Comment parentComment) {
         this.commentId = commentId;
         this.createdAt = createdAt;
         this.lastUpdated = lastUpdated;
@@ -69,11 +69,11 @@ public class Comment {
         this.parentComment = parentComment;
     }
 
-    public Integer getCommentId() {
+    public Long getCommentId() {
         return commentId;
     }
 
-    public void setCommentId(Integer commentId) {
+    public void setCommentId(Long commentId) {
         this.commentId = commentId;
     }
 
@@ -101,19 +101,19 @@ public class Comment {
         this.commentStatus = commentStatus;
     }
 
-    public Integer getLikes() {
+    public Long getLikes() {
         return likes;
     }
 
-    public void setLikes(Integer likes) {
+    public void setLikes(Long likes) {
         this.likes = likes;
     }
 
-    public Integer getDislikes() {
+    public Long getDislikes() {
         return dislikes;
     }
 
-    public void setDislikes(Integer dislikes) {
+    public void setDislikes(Long dislikes) {
         this.dislikes = dislikes;
     }
 

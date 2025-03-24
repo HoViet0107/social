@@ -6,32 +6,32 @@ import personal.social.enums.Status;
 import java.time.LocalDateTime;
 
 public class CommentDTO {
-    private Integer commentId;
+    private Long commentId;
 
     @JsonIgnore // use JsonIgnore to show create time only on response
     private LocalDateTime createdAt;
 
     @JsonIgnore
-    private Status commentStatus;
-
-    @JsonIgnore
     private LocalDateTime lastUpdated;
 
-    private Integer likes;
+    @JsonIgnore
+    private Status commentStatus;
 
-    private Integer dislikes;
+    private Long likes;
+
+    private Long dislikes;
 
     private String content;
 
-    private Integer userId;
+    private Long userId;
 
-    private Integer postId;
+    private Long postId;
 
-    private Integer parentCommentId;
+    private Long parentCommentId;
 
     public CommentDTO(){}
 
-    public CommentDTO(Integer commentId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status commentStatus, Integer likes, Integer dislikes, String content, Integer userId, Integer postId, Integer parentCommentId) {
+    public CommentDTO(Long commentId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status commentStatus, Long likes, Long dislikes, String content, Long userId, Long postId) {
         this.commentId = commentId;
         this.createdAt = createdAt;
         this.lastUpdated = lastUpdated;
@@ -41,14 +41,26 @@ public class CommentDTO {
         this.content = content;
         this.userId = userId;
         this.postId = postId;
+    }
+
+    public CommentDTO(Long commentId, LocalDateTime createdAt,LocalDateTime lastUpdated, Status commentStatus, Long likes, Long dislikes, String content, Long userId, Long postId, Long parentCommentId) {
+        this.commentId = commentId;
+        this.createdAt = createdAt;
+        this.commentStatus = commentStatus;
+        this.lastUpdated = lastUpdated;
+        this.likes = likes;
+        this.dislikes = dislikes;
+        this.content = content;
+        this.userId = userId;
+        this.postId = postId;
         this.parentCommentId = parentCommentId;
     }
 
-    public Integer getCommentId() {
+    public Long getCommentId() {
         return commentId;
     }
 
-    public void setCommentId(Integer commentId) {
+    public void setCommentId(Long commentId) {
         this.commentId = commentId;
     }
 
@@ -68,7 +80,7 @@ public class CommentDTO {
         this.commentStatus = commentStatus;
     }
 
-    public Integer getLikes() {
+    public Long getLikes() {
         return likes;
     }
 
@@ -80,15 +92,15 @@ public class CommentDTO {
         this.lastUpdated = lastUpdated;
     }
 
-    public void setLikes(Integer likes) {
+    public void setLikes(Long likes) {
         this.likes = likes;
     }
 
-    public Integer getDislikes() {
+    public Long getDislikes() {
         return dislikes;
     }
 
-    public void setDislikes(Integer dislikes) {
+    public void setDislikes(Long dislikes) {
         this.dislikes = dislikes;
     }
 
@@ -100,27 +112,27 @@ public class CommentDTO {
         this.content = content;
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 
-    public Integer getPostId() {
+    public Long getPostId() {
         return postId;
     }
 
-    public void setPostId(Integer postId) {
+    public void setPostId(Long postId) {
         this.postId = postId;
     }
 
-    public Integer getParentCommentId() {
+    public Long getParentCommentId() {
         return parentCommentId;
     }
 
-    public void setParentCommentId(Integer parentCommentId) {
+    public void setParentCommentId(Long parentCommentId) {
         this.parentCommentId = parentCommentId;
     }
 }

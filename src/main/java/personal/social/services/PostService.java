@@ -14,11 +14,11 @@ public interface PostService {
 
     Page<PostDTO> getAllPosts(Pageable pageable);
 
-    Optional<Post> getPostById(Integer postId);
+    Optional<Post> getPostById(Long postId);
 
     PostContent updatePost(PostContent postContent, User user);
 
-    void updatePostStatus(Integer postId, User user);
+    void updatePostStatus(Long postId, User user);
 
 
 }

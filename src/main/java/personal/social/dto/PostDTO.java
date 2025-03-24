@@ -5,7 +5,7 @@ import personal.social.enums.Status;
 import java.time.LocalDateTime;
 
 public class PostDTO {
-    private Integer postId;
+    private Long postId;
 
     private LocalDateTime createdAt;
 
@@ -15,10 +15,10 @@ public class PostDTO {
 
     private String content;
 
-    private Integer userId;
+    private Long userId;
 
     public PostDTO(){}
-    public PostDTO(Integer postId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status status, String content, Integer userId) {
+    public PostDTO(Long postId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status status, String content, Long userId) {
         this.postId = postId;
         this.createdAt = createdAt;
         this.lastUpdated = lastUpdated;
@@ -27,11 +27,11 @@ public class PostDTO {
         this.userId = userId;
     }
 
-    public Integer getPostId() {
+    public Long getPostId() {
         return postId;
     }
 
-    public void setPostId(Integer postId) {
+    public void setPostId(Long postId) {
         this.postId = postId;
     }
 
@@ -67,11 +67,11 @@ public class PostDTO {
         this.content = content;
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 }

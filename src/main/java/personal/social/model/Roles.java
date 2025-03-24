@@ -10,7 +10,7 @@ public class Roles {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
-    private Integer roleId;
+    private Long roleId;
 
     @Enumerated(EnumType.STRING)
     private RoleEnum role;
@@ -19,7 +19,7 @@ public class Roles {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Roles(Integer roleId, RoleEnum role, User user) {
+    public Roles(Long roleId, RoleEnum role, User user) {
         this.roleId = roleId;
         this.role = role;
         this.user = user;
@@ -28,11 +28,11 @@ public class Roles {
     public Roles() {
     }
 
-    public Integer getRoleId() {
+    public Long getRoleId() {
         return roleId;
     }
 
-    public void setRoleId(Integer roleId) {
+    public void setRoleId(Long roleId) {
         this.roleId = roleId;
     }
 

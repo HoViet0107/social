@@ -2,14 +2,14 @@ package personal.social.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import personal.social.config.JwtUtil;
 import personal.social.dto.CommentDTO;
-import personal.social.model.User;
 import personal.social.repository.UserRepository;
 import personal.social.services.CommentService;
 
@@ -19,15 +19,18 @@ public class CommentController {
     private final CommentService commentService;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepos;
+    private final PagedResourcesAssembler<CommentDTO> pagedResourcesAssembler;
 
     @Autowired
     public CommentController(
             CommentService commentService,
             JwtUtil jwtUtil,
-            UserRepository userRepos){
+            UserRepository userRepos,
+            PagedResourcesAssembler<CommentDTO> pagedResourcesAssembler){
         this.commentService = commentService;
         this.jwtUtil = jwtUtil;
         this.userRepos = userRepos;
+        this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
     @PostMapping
@@ -49,6 +52,18 @@ public class CommentController {
             return ResponseEntity.ok(commentService.createComment(commentDTO));
         }catch(Exception e){
                 return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getPostParentComments(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize){
+        try{
+            return ResponseEntity.ok(commentService.getParentComments(postId, pageNumber, pageSize));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

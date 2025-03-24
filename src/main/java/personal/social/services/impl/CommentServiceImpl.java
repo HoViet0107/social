@@ -2,6 +2,7 @@ package personal.social.services.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import personal.social.dto.CommentDTO;
 import personal.social.enums.Status;
@@ -13,8 +14,11 @@ import personal.social.repository.PostRepository;
 import personal.social.repository.UserRepository;
 import personal.social.services.CommentService;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -36,12 +40,12 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Page<CommentDTO> getParentComments(Integer postId) {
+    public List<CommentDTO> getParentComments(Long postId, int pageNumber, int pageSize) {
         return null;
     }
 
     @Override
-    public Page<CommentDTO> getCommentReplies(Integer commentId) {
+    public Page<CommentDTO> getCommentReplies(Long commentId, Pageable pageable) {
         return null;
     }
 

@@ -1,12 +1,15 @@
 package personal.social.services;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import personal.social.dto.CommentDTO;
 
-public interface CommentService {
-    Page<CommentDTO> getParentComments(Integer postId);
+import java.util.List;
 
-    Page<CommentDTO> getCommentReplies(Integer commentId);
+public interface CommentService {
+    List<CommentDTO> getParentComments(Long postId, int pageNumber, int pageSize);
+
+    Page<CommentDTO> getCommentReplies(Long commentId, Pageable pageable);
 
     CommentDTO createComment(CommentDTO commentDTO);
 }

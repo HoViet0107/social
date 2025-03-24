@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import personal.social.model.CommentContent;
 
 @Repository
-public interface CommentContentRepository extends JpaRepository<CommentContent, Integer> {
+public interface CommentContentRepository extends JpaRepository<CommentContent, Long> {
 }

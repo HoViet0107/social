@@ -13,7 +13,7 @@ import personal.social.model.User;
 import java.util.Optional;
 
 @Repository
-public interface PostRepository extends JpaRepository<Post, Integer> {
+public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Query(value = "SELECT new personal.social.dto.PostDTO(p.postId, p.createdAt, p.lastUpdated, " +
             "p.status, pc.content, p.user.userId) " +
@@ -23,14 +23,14 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     Page<PostDTO> findAllPosts(Pageable pageable);
 
     Page<Post> findByUser(User user, Pageable pageable);
-    Post findByPostId(Integer postId);
+    Post findByPostId(Long postId);
 
     @Query(value = "SELECT new personal.social.dto.PostDTO(p.postId, p.createdAt, p.lastUpdated, " +
             "p.status, pc.content, p.user.userId) " +
             "FROM Post p " +
             "JOIN PostContent pc ON p.lastUpdated = pc.updatedAt " +
             "WHERE p.postId = :postId")
-    Optional<Post> findById(Integer postId);
+    Optional<Post> findById(Long postId);
 
     Page<Post> findByUserAndStatus(User user, Status status, Pageable pageable);
 }

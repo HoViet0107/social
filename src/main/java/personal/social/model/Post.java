@@ -10,7 +10,7 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
-    private Integer postId;
+    private Long postId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -35,7 +35,7 @@ public class Post {
         this.user = user;
     }
 
-    public Post(Integer postId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status status, User user) {
+    public Post(Long postId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status status, User user) {
         this.postId = postId;
         this.createdAt = createdAt;
         this.lastUpdated = lastUpdated;
@@ -43,11 +43,11 @@ public class Post {
         this.user = user;
     }
 
-    public Integer getPostId() {
+    public Long getPostId() {
         return postId;
     }
 
-    public void setPostId(Integer postId) {
+    public void setPostId(Long postId) {
         this.postId = postId;
     }
 

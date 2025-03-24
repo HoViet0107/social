@@ -59,7 +59,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Optional<Post> getPostById(Integer postId) {
+    public Optional<Post> getPostById(Long postId) {
         return postRepos.findById(postId);
     }
 
@@ -80,7 +80,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void updatePostStatus(Integer postId, User user) {
+    public void updatePostStatus(Long postId, User user) {
         Post deletedPost = postRepos.findByPostId(postId);
         if(deletedPost.getUser().equals(user)){
             if(deletedPost.getStatus().equals(Status.ACTIVE)){

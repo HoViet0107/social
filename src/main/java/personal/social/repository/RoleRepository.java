@@ -8,6 +8,6 @@ import personal.social.model.User;
 import java.util.List;
 
 @Repository
-public interface RoleRepository extends JpaRepository<Roles, Integer> {
+public interface RoleRepository extends JpaRepository<Roles, Long> {
     List<Roles> findByUser(User user);
 }

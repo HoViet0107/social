@@ -9,7 +9,7 @@ public class PostContent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_content_id")
-    private Integer postContentId;
+    private Long postContentId;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content; // post content
@@ -30,18 +30,18 @@ public class PostContent {
         this.post = post;
     }
 
-    public PostContent(Integer postContentId, String content, LocalDateTime updatedAt, Post post) {
+    public PostContent(Long postContentId, String content, LocalDateTime updatedAt, Post post) {
         this.postContentId = postContentId;
         this.content = content;
         this.updatedAt = updatedAt;
         this.post = post;
     }
 
-    public Integer getPostContentId() {
+    public Long getPostContentId() {
         return postContentId;
     }
 
-    public void setPostContentId(Integer postContentId) {
+    public void setPostContentId(Long postContentId) {
         this.postContentId = postContentId;
     }
 

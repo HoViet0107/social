@@ -45,7 +45,7 @@ public class PostController {
         return pagedResourcesAssembler.toModel(posts);
     }
     @GetMapping("/{postId}")
-    public ResponseEntity<?> getPostById(@PathVariable Integer postId){
+    public ResponseEntity<?> getPostById(@PathVariable Long postId){
         try{
             return ResponseEntity.ok(postService.getPostById(postId));
         }catch (Exception e){
@@ -109,7 +109,7 @@ public class PostController {
     @Operation(summary = "Update status", security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping("/{postId}/status")
     public ResponseEntity<?> updatePostStatus(
-            @PathVariable Integer postId,
+            @PathVariable Long postId,
             HttpServletRequest request){
         // extract token
         String token = request.getHeader("Authorization");
