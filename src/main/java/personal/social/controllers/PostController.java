@@ -106,7 +106,7 @@ public class PostController {
         }
     }
 
-    @Operation(summary = "Update post content", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "Update status", security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping("/{postId}/status")
     public ResponseEntity<?> updatePostStatus(
             @PathVariable Integer postId,
