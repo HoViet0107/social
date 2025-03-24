@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import personal.social.enums.Status;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Entity
 @Table(name = "comments", indexes = {
@@ -44,6 +45,17 @@ public class Comment {
     private Comment parentComment;
 
     public Comment(){}
+
+    public Comment(LocalDateTime createdAt, LocalDateTime lastUpdated, Status commentStatus, Integer likes, Integer dislikes, User user, Post post, Comment parentComment) {
+        this.createdAt = createdAt;
+        this.lastUpdated = lastUpdated;
+        this.commentStatus = commentStatus;
+        this.likes = likes;
+        this.dislikes = dislikes;
+        this.user = user;
+        this.post = post;
+        this.parentComment = parentComment;
+    }
 
     public Comment(Integer commentId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status commentStatus, Integer likes, Integer dislikes, User user, Post post, Comment parentComment) {
         this.commentId = commentId;

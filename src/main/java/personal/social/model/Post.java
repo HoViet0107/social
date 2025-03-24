@@ -28,6 +28,13 @@ public class Post {
     public Post() {
     }
 
+    public Post(LocalDateTime createdAt, LocalDateTime lastUpdated, Status status, User user) {
+        this.createdAt = createdAt;
+        this.lastUpdated = lastUpdated;
+        this.status = status;
+        this.user = user;
+    }
+
     public Post(Integer postId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status status, User user) {
         this.postId = postId;
         this.createdAt = createdAt;

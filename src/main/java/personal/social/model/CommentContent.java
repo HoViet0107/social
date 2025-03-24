@@ -26,6 +26,12 @@ public class CommentContent {
 
     public CommentContent(){}
 
+    public CommentContent(String content, LocalDateTime lastUpdated, Comment comment) {
+        this.content = content;
+        this.lastUpdated = lastUpdated;
+        this.comment = comment;
+    }
+
     public CommentContent(Integer commentContentId, String content, LocalDateTime lastUpdated, Comment comment) {
         this.commentContentId = commentContentId;
         this.content = content;

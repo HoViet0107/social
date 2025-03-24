@@ -24,6 +24,12 @@ public class PostContent {
     public PostContent() {
     }
 
+    public PostContent(String content, LocalDateTime updatedAt, Post post) {
+        this.content = content;
+        this.updatedAt = updatedAt;
+        this.post = post;
+    }
+
     public PostContent(Integer postContentId, String content, LocalDateTime updatedAt, Post post) {
         this.postContentId = postContentId;
         this.content = content;
