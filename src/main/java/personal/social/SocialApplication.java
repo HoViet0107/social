@@ -66,7 +66,7 @@ public class SocialApplication implements CommandLineRunner {
             adminRole.setUser(existedAd);
             roleRepos.save(adminRole);
         }
-		/*
+        /*
 			// add post 1
 			Post post = new Post(current,current,Status.ACTIVE,existedAd);
 			postRepos.save(post);
@@ -75,16 +75,16 @@ public class SocialApplication implements CommandLineRunner {
 
 			existedAd = userRepo.findByEmail("admin");
 			// create comment 1
-			Comment comment = new Comment(current,current,Status.ACTIVE, 0,0,existedAd,post,null);
+			Comment comment = new Comment(current,current,Status.ACTIVE, 0L,0L,existedAd,post,null);
 			commentRepos.save(comment);
 			CommentContent commentContent = new CommentContent("comment 1 content", current, comment);
 			cmtContentRepos.save(commentContent);
 
 			// create comment 2
-			Comment comment1 = new Comment(current,current,Status.ACTIVE, 0,0,existedAd,post,comment);
+			Comment comment1 = new Comment(current,current,Status.ACTIVE, 0L,0L,existedAd,post,comment);
 			commentRepos.save(comment1);
-			CommentContent comment1Content = new CommentContent("comment 2 content", current, comment);
+			CommentContent comment1Content = new CommentContent("comment 2 content", current, comment1);
 			cmtContentRepos.save(comment1Content);
-		*/
+        */
     }
 }
