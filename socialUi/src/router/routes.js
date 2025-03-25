@@ -4,9 +4,18 @@ const routes = [
     component: () => import('layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
   },
+  {
+    path: '/group',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('pages/GroupPage.vue') }],
+  },
+  {
+    path: '/chat',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('pages/ChatsPage.vue') }],
+  },
 
-  // Always leave this as last one,
-  // but you can also remove it
+  //
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),

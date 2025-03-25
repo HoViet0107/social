@@ -1,6 +1,6 @@
 <template>
   <q-page class="column flex-center">
-    Home
+    Chat page
   </q-page>
 </template>
 

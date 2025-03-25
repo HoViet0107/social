@@ -1,6 +1,6 @@
 <template>
   <q-page class="column flex-center">
-    Home
+    Group page
   </q-page>
 </template>
 
