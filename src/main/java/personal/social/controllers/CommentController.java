@@ -66,4 +66,17 @@ public class CommentController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/reply/{parentCommentId}")
+    public ResponseEntity<?> getCommentReplies(
+            @RequestParam Long postId,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @PathVariable Long parentCommentId){
+        try{
+            return ResponseEntity.ok(commentService.getCommentReplies(postId, pageNumber, pageSize,parentCommentId));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

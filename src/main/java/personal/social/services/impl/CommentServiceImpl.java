@@ -42,7 +42,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentDTO> getParentComments(Long postId, Integer pageNumber, Integer pageSize) {
         // throw exception if post not found
-        if(postRepos.existsById(postId)){
+        if(postRepos.findByPostId(postId) == null){
             throw new RuntimeException("Post not found!");
         }
         List<Object[]> results = commentRepos.findTopLevelComments(postId, pageNumber, pageSize);
@@ -65,8 +65,31 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Page<CommentDTO> getCommentReplies(Long commentId, Pageable pageable) {
-        return null;
+    public List<CommentDTO> getCommentReplies(Long postId, Integer pageNumber, Integer pageSize, Long parentCmtId) {
+        // throw exception if parent comment not found
+        if(commentRepos.findById(parentCmtId) == null){
+            throw new RuntimeException("Service: Comment not found!");
+        }
+
+        List<Object[]> results = commentRepos.findCommentReplies(postId, pageNumber, pageSize, parentCmtId);
+
+        // throw exception if post have no comment
+        if(results.isEmpty()){
+            throw new RuntimeException("Service: Comment have no replies!");
+        }
+
+        return results.stream().map(obj -> new CommentDTO(
+                ((Number) obj[0]).longValue(),  // commentId
+                ((Timestamp) obj[1]).toLocalDateTime(), // createdAt
+                ((Timestamp) obj[2]).toLocalDateTime(), // lastUpdated
+                Status.valueOf((String) obj[3]),    // commentStatus
+                ((Number) obj[4]).longValue(),   // likes
+                ((Number) obj[5]).longValue(),   // dislikes
+                (String) obj[6],    // content
+                ((Number) obj[7]).longValue(),   // userId
+                ((Number) obj[8]).longValue(),   // postId
+                ((Number) obj[9]).longValue()    // parentCommentId
+        )).collect(Collectors.toList());
     }
 
     @Override

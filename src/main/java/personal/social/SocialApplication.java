@@ -75,7 +75,7 @@ public class SocialApplication implements CommandLineRunner {
 
 			existedAd = userRepo.findByEmail("admin");
 			// create comment 1
-			Comment comment = new Comment(current,current,Status.ACTIVE, 0L,0L,existedAd,post,null);
+			Comment comment = new Comment(current,current,Status.ACTIVE, 0L,0L,existedAd,post,0);
 			commentRepos.save(comment);
 			CommentContent commentContent = new CommentContent("comment 1 content", current, comment);
 			cmtContentRepos.save(commentContent);

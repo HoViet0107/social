@@ -11,9 +11,17 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    @Query(value = "CALL GetTopLevelComments(:postId, :pageNumber, :pageSize)", nativeQuery = true)
+    @Query(value = "CALL GetTopLevelComment(:postId, :pageNumber, :pageSize)", nativeQuery = true)
     List<Object[]> findTopLevelComments(
             @Param("postId") Long postId,
             @Param("pageNumber") Integer pageNumber,
             @Param("pageSize") Integer pageSize);
+
+    @Query(value = "CALL GetCommentReplies(:postId, :pageNumber, :pageSize, :parentCmtId)", nativeQuery = true)
+    List<Object[]> findCommentReplies(
+            @Param("postId") Long postId,
+            @Param("pageNumber") Integer pageNumber,
+            @Param("pageSize") Integer pageSize,
+            @Param("parentCmtId") Long parentCmtId
+    );
 }
