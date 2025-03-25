@@ -33,3 +33,7 @@ build/
 .vscode/
 
 src/main/java/personal/social/SocialApplication.java
+
+socialUi/.gitignore
+socialUi/README.md
+socialUi/node_modules
