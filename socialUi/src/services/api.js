@@ -11,10 +11,10 @@ export const api = axios.create({
 
 export const UserServices = {
     login(data) {
-        return api.post(`/login`, data);
+        return api.post(`/auth/login`, data);
     },
     register(data) {
-        return api.post(`/register`, data);
+        return api.post(`/auth/register`, data);
     },
     getUserById(userId) {
         return api.get(`/user/${userId}`);

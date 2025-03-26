@@ -1,4 +1,16 @@
 const routes = [
+  // auth router
+  {
+    path: '/auth/login',
+    component: () => import('src/layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('src/pages/Auth/LoginPage.vue') }],
+  },
+  {
+    path: '/auth/register',
+    component: () => import('src/layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('src/pages/Auth/RegisterPage.vue') }],
+  },
+  // 
   {
     path: '/',
     component: () => import('src/layouts/MainLayout.vue'),
@@ -14,6 +26,7 @@ const routes = [
     component: () => import('src/layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('src/pages/ChatsPage.vue') }],
   },
+
 
   //
   {

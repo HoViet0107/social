@@ -14,7 +14,7 @@
           </div>
         </div>
         <div class="text-caption text-grey">
-          Created at: {{ post.createdAt }} - Updated at: {{ post.lastUpdated }}
+          Created at: {{ post.createdAt }}
         </div>
         <q-separator class="q-my-sm" />
         <div class="text-body1">{{ post.content }}</div>
@@ -40,11 +40,8 @@ const fetchPosts = async () => {
 
       // Call API to fetch user for each post
       for (let post of posts.value) {
-        console.log(post);
-
         if (post.userId) {
           fetchUser(post);
-          console.log(post);
         }
       }
     } else {

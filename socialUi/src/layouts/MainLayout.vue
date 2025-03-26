@@ -2,8 +2,6 @@
   <q-layout view="lHr LpR fFf">
     <q-header reveal bordered class="bg-primary text-white" height-hint="98">
       <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
-
         <q-toolbar-title>
           <div class="absolute-center text-body1">
             <q-avatar>
@@ -48,17 +46,14 @@
       </q-tabs>
     </q-header>
 
-    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered>
-      <!-- drawer content -->
-    </q-drawer>
-
+    <!-- right drawer -->
     <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
       <q-tabs vertical>
-        <q-route-tab to="/auth" icon="account_circle" label="account" />
+        <q-route-tab to="/auth/login" icon="account_circle" label="account" />
       </q-tabs>
     </q-drawer>
 
-    <q-page-container>
+    <q-page-container class="w-full">
       <router-view />
     </q-page-container>
   </q-layout>
@@ -69,15 +64,9 @@ import { ref } from 'vue'
 
 export default {
   setup() {
-    const leftDrawerOpen = ref(false)
     const rightDrawerOpen = ref(false)
 
     return {
-      leftDrawerOpen,
-      toggleLeftDrawer() {
-        leftDrawerOpen.value = !leftDrawerOpen.value
-      },
-
       rightDrawerOpen,
       toggleRightDrawer() {
         rightDrawerOpen.value = !rightDrawerOpen.value
