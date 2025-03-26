@@ -53,7 +53,9 @@
     </q-drawer>
 
     <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
-      <!-- drawer content -->
+      <q-tabs vertical>
+        <q-route-tab to="/auth" icon="account_circle" label="account" />
+      </q-tabs>
     </q-drawer>
 
     <q-page-container>
