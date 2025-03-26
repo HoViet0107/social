@@ -1,5 +1,6 @@
 package personal.social.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ public class User {
     @Column(columnDefinition = "VARCHAR(155)", unique = true, nullable = false)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 

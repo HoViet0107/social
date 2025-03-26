@@ -15,6 +15,7 @@ import personal.social.services.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -51,6 +52,11 @@ public class UserServiceImpl implements UserService {
         String token = jwtUtil.generateToken(userDTO.getEmail(), roleNames);
         AuthResponse authResponse = new AuthResponse(token, "Login successfully!");
         return authResponse;
+    }
+
+    @Override
+    public Optional<User> getUserById(Long userId) {
+        return userRepo.findById(userId);
     }
 
     @Override
