@@ -19,7 +19,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             "p.status, pc.content, p.user.userId) " +
             "FROM Post p " +
             "JOIN PostContent pc ON p.lastUpdated = pc.updatedAt " +
-            "WHERE p.status = 'ACTIVE'")
+            "WHERE p.status = 'ACTIVE' " +
+            "ORDER BY p.createdAt DESC")
     Page<PostDTO> findAllPosts(Pageable pageable);
 
     Page<Post> findByUser(User user, Pageable pageable);

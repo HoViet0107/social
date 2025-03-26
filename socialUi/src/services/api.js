@@ -28,8 +28,12 @@ export const PostServices = {
     getPostById(postId) {
         return api.get(`/posts/${postId}`);
     },
-    createPost(data) {
-        return api.post(`/posts`, data);
+    createPost(data, token) {
+        return api.post(`/posts`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
     },
     updatePost(data) {
         return api.put(`/posts`, data);
