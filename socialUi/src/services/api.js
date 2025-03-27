@@ -43,4 +43,18 @@ export const PostServices = {
     }
 };
 
+export const CommentServices = {
+    getComments(postId) {
+        return api.get(`/comments/${postId}?pageNumber=1&pageSize=10`);
+    },
+    getReplies(parentCommentId, postId) {
+        return api.get(`/comments/reply/${parentCommentId}?postId=${postId}&pageNumber=1&pageSize=5`);
+    },
+    createComment(data, token) {
+        return api.post(`/comments`, data, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+    }
+};
+
 

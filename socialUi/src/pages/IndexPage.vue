@@ -42,8 +42,21 @@
         </div>
         <q-separator class="q-my-sm" />
         <div class="text-body1">{{ post.content }}</div>
+
+        <!-- post like, comment -->
+        <q-separator class="q-my-sm" />
+        <div class="row full-width justify-between items-center q-gutter-md">
+          <q-btn flat round dense icon="favorite_border" size="md" />
+          <q-btn flat round dense icon="mode_comment" size="md" @click="openPost(post)" />
+          <q-btn flat round dense icon=" share" size="md" />
+        </div>
+
       </q-card-section>
     </q-card>
+
+    <!-- Post detail Dialog -->
+    <!-- <PostDetail v-if="selectedPost" v-model="isPostOpen" :post="selectedPost" @close="isPostOpen = false" /> -->
+    <PostDetail v-model="isPostOpen" :post="selectedPost" />
   </q-page>
 </template>
 
@@ -51,11 +64,14 @@
 import { ref, onMounted } from "vue";
 import { format } from "date-fns";
 import { PostServices, UserServices } from "src/services/api";
+import PostDetail from "src/components/PostDetail.vue";
 
 const posts = ref([]); // initialize posts as an empty array
 const text = ref(''); // post content
 // const ph = ref('');
 const dense = ref(false);
+const selectedPost = ref(null); // initialize selectedPost as null
+const isPostOpen = ref(false); // initialize isPostOpen as false
 
 // Call API when component is mounted to fetch posts
 const fetchPosts = async () => {
@@ -134,6 +150,13 @@ const submitPost = async () => {
     console.error("Failed to create post:", error.response?.data || error.message);
   }
 }
+
+// Open post detail dialog
+const openPost = (post) => {
+  selectedPost.value = post;
+  isPostOpen.value = true;
+};
+
 
 // Call API when component is loaded
 onMounted(fetchPosts);

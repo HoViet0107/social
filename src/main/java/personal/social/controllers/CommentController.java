@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import personal.social.config.JwtUtil;
 import personal.social.dto.CommentDTO;
+import personal.social.model.User;
 import personal.social.repository.UserRepository;
 import personal.social.services.CommentService;
 
@@ -47,9 +48,10 @@ public class CommentController {
         if(jwtUtil.isTokenExpired(token)){
             return ResponseEntity.badRequest().body("Token expired!");
         }
-
+        // get user by email
+        User user = userRepos.findByEmail(jwtUtil.extractEmail(token));
         try{
-            return ResponseEntity.ok(commentService.createComment(commentDTO));
+            return ResponseEntity.ok(commentService.createComment(commentDTO,user));
         }catch(Exception e){
                 return ResponseEntity.badRequest().body(e.getMessage());
         }

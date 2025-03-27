@@ -1,5 +1,6 @@
 package personal.social.services;
 import personal.social.dto.CommentDTO;
+import personal.social.model.User;
 
 import java.util.List;
 
@@ -8,5 +9,5 @@ public interface CommentService {
 
     List<CommentDTO> getCommentReplies(Long postId, Integer pageNumber, Integer pageSize, Long parentCmtId);
 
-    CommentDTO createComment(CommentDTO commentDTO);
+    CommentDTO createComment(CommentDTO commentDTO, User user);
 }

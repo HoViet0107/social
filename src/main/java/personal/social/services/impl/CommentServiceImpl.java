@@ -8,6 +8,7 @@ import personal.social.dto.CommentDTO;
 import personal.social.enums.Status;
 import personal.social.model.Comment;
 import personal.social.model.CommentContent;
+import personal.social.model.User;
 import personal.social.repository.CommentContentRepository;
 import personal.social.repository.CommentRepository;
 import personal.social.repository.PostRepository;
@@ -93,7 +94,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentDTO createComment(CommentDTO commentDTO) {
+    public CommentDTO createComment(CommentDTO commentDTO, User user) {
         LocalDateTime currentTime = LocalDateTime.now();
         // create comment obj
         Comment newComment = new Comment();
@@ -103,7 +104,7 @@ public class CommentServiceImpl implements CommentService {
         newComment.setCreatedAt(currentTime);
         newComment.setLastUpdated(currentTime);
         newComment.setPost(postRepos.findByPostId(commentDTO.getPostId()));
-        newComment.setUser(userRepos.findByUserId(commentDTO.getUserId()));
+        newComment.setUser(user);
         newComment.setParentComment(parentComment.orElse(null));
         try{
             commentRepos.save(newComment); // save to database
