@@ -36,10 +36,13 @@
           <div class="text-caption text-weight-bold">
             {{ post.user ? post.user.lastName : "Unknown" }}
           </div>
+          <!-- action menu -->
+          <ActionMenu class="float-right" @edit="handleEdit" @remove="handleDelete" @report="handleReport" />
         </div>
         <div class="text-caption text-grey">
           Created at: {{ formatDate(post.createdAt) }}
         </div>
+
         <q-separator class="q-my-sm" />
         <div class="text-body1">{{ post.content }}</div>
 
@@ -65,6 +68,7 @@ import { ref, onMounted } from "vue";
 import { format } from "date-fns";
 import { PostServices, UserServices } from "src/services/api";
 import PostDetail from "src/components/PostDetail.vue";
+import ActionMenu from "src/components/ActionMenu.vue";
 
 const posts = ref([]); // initialize posts as an empty array
 const text = ref(''); // post content
@@ -157,6 +161,18 @@ const openPost = (post) => {
   isPostOpen.value = true;
 };
 
+// action menu
+const handleEdit = () => {
+  console.log("Chỉnh sửa bài viết/comment");
+};
+
+const handleDelete = () => {
+  console.log("Xóa bài viết/comment");
+};
+
+const handleReport = () => {
+  console.log("Báo cáo bài viết/comment");
+}; // end
 
 // Call API when component is loaded
 onMounted(fetchPosts);
