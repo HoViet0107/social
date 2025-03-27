@@ -1,45 +1,216 @@
-<template>
-    <q-card-section>
-        <!-- Form nhập comment -->
-        <q-input v-model="newComment" label="Write a comment..." dense outlined class="q-mb-md">
-            <template v-slot:append>
-                <q-btn icon="send" dense flat @click="addComment" />
-            </template>
-        </q-input>
+<script setup>
+import { CommentServices } from 'src/services/api';
+import ActionMenu from './ActionMenu.vue';
+import { ref, onMounted } from 'vue';
 
-        <!-- Danh sách comment -->
-        <div v-for="comment in comments" :key="comment.commentId" class="q-mb-md">
+// Define props
+const props = defineProps({
+    postId: {
+        type: Number,
+        required: true
+    },
+    userId: {
+        type: Number,
+        required: true
+    }
+});
+
+// Initialize refs
+const loading = ref(false);
+const error = ref(null);
+const comments = ref([]);
+const replies = ref({});
+const replyingTo = ref(null);
+const newReply = ref('');
+const showReplies = ref({});
+
+// Fetch comments
+const fetchComments = async () => {
+    loading.value = true;
+    error.value = null;
+    try {
+        const response = await CommentServices.getComments(props.postId);
+        console.log('Raw API response:', response);
+
+        if (Array.isArray(response)) {
+            comments.value = response;
+        } else if (response && Array.isArray(response.data)) {
+            comments.value = response.data;
+        } else {
+            console.error('Unexpected response format:', response);
+            comments.value = [];
+            error.value = 'Received invalid data format from server';
+        }
+
+        // Initialize replies object
+        comments.value.forEach(comment => {
+            showReplies.value[comment.commentId] = false;
+            replies.value[comment.commentId] = [];
+        });
+    } catch (err) {
+        console.error('Error fetching comments:', err);
+        error.value = 'Failed to load comments. Please try again.';
+        comments.value = [];
+    } finally {
+        loading.value = false;
+    }
+};
+
+// Toggle replies visibility
+const toggleReplies = async (commentId) => {
+    showReplies.value[commentId] = !showReplies.value[commentId];
+
+    // Fetch replies if showing and not already loaded
+    if (showReplies.value[commentId] && (!replies.value[commentId] || replies.value[commentId].length === 0)) {
+        try {
+            const response = await CommentServices.getReplies(commentId, props.postId);
+            if (Array.isArray(response)) {
+                replies.value[commentId] = response;
+            } else if (response && Array.isArray(response.data)) {
+                replies.value[commentId] = response.data;
+            } else {
+                console.error('Unexpected replies format:', response);
+                replies.value[commentId] = [];
+            }
+        } catch (error) {
+            console.error('Error fetching replies:', error);
+        }
+    }
+};
+
+// Toggle reply form
+const toggleReplyForm = (commentId) => {
+    replyingTo.value = replyingTo.value === commentId ? null : commentId;
+    newReply.value = '';
+};
+
+// Add reply function
+const addReply = async (commentId) => {
+    try {
+        const token = JSON.parse(localStorage.getItem('authUser'));
+        if (!token || !newReply.value.trim()) {
+            return;
+        }
+
+        const response = await CommentServices.addReply(
+            commentId,
+            props.postId,
+            newReply.value,
+            token
+        );
+
+        // Add the new reply to the local state
+        if (!replies.value[commentId]) {
+            replies.value[commentId] = [];
+        }
+
+        // Handle different response formats
+        if (response && response.data) {
+            replies.value[commentId].push(response.data);
+        } else {
+            replies.value[commentId].push(response);
+        }
+
+        // Clear the input and reset replyingTo
+        newReply.value = '';
+        replyingTo.value = null;
+
+        // Make sure replies are visible
+        showReplies.value[commentId] = true;
+    } catch (error) {
+        console.error('Error adding reply:', error);
+    }
+};
+
+onMounted(async () => {
+    await fetchComments();
+});
+
+// Handlers
+const handleCommentEdit = (comment) => {
+    console.log('Edit comment:', comment);
+};
+
+const handleReplyEdit = (reply) => {
+    console.log('Edit reply:', reply);
+};
+
+const handleCommentReport = (comment) => {
+    console.log('Report comment:', comment);
+};
+
+const handleReplyReport = (reply) => {
+    console.log('Report reply:', reply);
+};
+
+const handleCommentDelete = async (comment) => {
+    try {
+        console.log('comment deleted: ', comment);
+
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+    }
+};
+
+const handleReplyDelete = async (reply) => {
+    try {
+        console.log('Deleted', reply);
+    } catch (error) {
+        console.error('Error deleting reply:', error);
+    }
+};
+</script>
+
+<template>
+    <div>
+        <div v-if="error" class="text-negative q-pa-md">
+            {{ error }}
+        </div>
+
+        <div v-if="loading" class="text-center q-pa-md">
+            <q-spinner color="primary" size="2em" />
+            <div>Loading comments...</div>
+        </div>
+
+        <div v-if="!loading && comments.length === 0" class="text-center q-pa-md">
+            No comments yet. Be the first to comment!
+        </div>
+
+        <!-- Comments section -->
+        <div v-for="comment in comments" :key="comment.commentId">
             <q-card flat bordered class="q-pa-sm">
-                <q-card-section>
+                <q-card-section class="relative">
+                    <ActionMenu :item="comment" @edit="handleCommentEdit" @remove="handleCommentDelete"
+                        @report="handleCommentReport" />
                     <div class="text-bold">User ID: {{ comment.userId }} - Cmt ID: {{ comment.commentId }}</div>
                     <div class="text-body2">{{ comment.content }}</div>
                 </q-card-section>
 
-                <q-separator />
+                <!-- Reply actions -->
+                <q-card-actions>
+                    <q-btn flat dense size="sm" @click="toggleReplyForm(comment.commentId)">
+                        {{ replyingTo === comment.commentId ? 'Cancel' : 'Reply' }}
+                    </q-btn>
+                    <q-btn flat dense size="sm" @click="toggleReplies(comment.commentId)">
+                        {{ showReplies[comment.commentId] ? 'Hide Replies' : 'Show Replies' }}
+                    </q-btn>
+                </q-card-actions>
 
-                <!-- Like, Reply -->
-                <div class="row justify-between q-gutter-sm">
-                    <q-btn flat dense size="sm" icon="thumb_up" />
-                    <q-btn flat dense size="sm" icon="reply" @click="toggleReply(comment.commentId)" />
-                    <q-btn flat dense size="sm" icon="expand_more" v-if="!showReplies[comment.commentId]"
-                        @click="fetchReplies(comment.commentId)"> Show Replies </q-btn>
-                    <q-btn flat dense size="sm" icon="expand_less" v-if="showReplies[comment.commentId]"
-                        @click="toggleReplyVisibility(comment.commentId)"> Hide Replies </q-btn>
-                </div>
-
-                <!-- Form reply -->
+                <!-- Reply form -->
                 <q-input v-if="replyingTo === comment.commentId" v-model="newReply" label="Reply..." dense outlined
-                    class="q-mt-sm">
+                    class="q-mt-sm q-px-md">
                     <template v-slot:append>
                         <q-btn icon="send" dense flat @click="addReply(comment.commentId)" />
                     </template>
                 </q-input>
 
-                <!-- Show reply -->
+                <!-- Replies section -->
                 <div v-if="showReplies[comment.commentId]" class="q-ml-md q-mt-sm">
                     <div v-for="reply in replies[comment.commentId]" :key="reply.commentId" class="q-mb-md">
                         <q-card flat bordered class="q-pa-sm">
-                            <q-card-section>
+                            <q-card-section class="relative">
+                                <ActionMenu :item="reply" @edit="handleReplyEdit" @remove="handleReplyDelete"
+                                    @report="handleReplyReport" />
                                 <div class="text-bold">
                                     <span class="text-grey">Reply ID:</span> {{ reply.commentId }} -
                                     <span class="text-grey">Reply to:</span> {{ reply.parentCommentId }}
@@ -51,107 +222,11 @@
                 </div>
             </q-card>
         </div>
-    </q-card-section>
+    </div>
 </template>
 
-<script setup>
-import { ref, defineProps, onMounted } from "vue";
-import { CommentServices } from "src/services/api";
-
-const props = defineProps({ postId: Number, userid: Number });
-
-const comments = ref([]);
-const replies = ref({});
-const showReplies = ref({});
-const replyingTo = ref(null);
-const newComment = ref("");
-const newReply = ref("");
-
-const fetchComments = async () => {
-    try {
-        const response = await CommentServices.getComments(props.postId);
-        if (response.data == []) {
-            throw new Error(`No comments found for this post: ${props.postId}!`);
-        }
-        comments.value = response.data;
-    } catch (error) {
-        console.error("Failed to fetch comments:", error);
-    }
-};
-
-const fetchReplies = async (parentCommentId) => {
-    try {
-        const response = await CommentServices.getReplies(parentCommentId, props.postId);
-        if (response.data == []) {
-            throw new Error(`No replies found for this comment: ${parentCommentId}!`);
-        }
-
-        // Cập nhật danh sách reply chỉ cho comment cha cụ thể
-        replies.value = { ...replies.value, [parentCommentId]: response.data };
-
-        // // Cập nhật trạng thái show/hide đúng cách
-        showReplies.value = { ...showReplies.value, [parentCommentId]: true };
-        console.log(showReplies.value);
-
-    } catch (error) {
-        console.error("Failed to fetch replies:", error);
-    }
-};
-
-
-const toggleReplyVisibility = (parentCommentId) => {
-    showReplies.value[parentCommentId] = !showReplies.value[parentCommentId];
-};
-
-const toggleReply = (commentId) => {
-    replyingTo.value = replyingTo.value === commentId ? null : commentId;
-};
-
-const addComment = async () => {
-    if (!newComment.value.trim()) return;
-
-    const token = JSON.parse(localStorage.getItem("authUser"));
-    const data = { content: newComment.value, postId: props.postId, parentCommentId: 0 };
-    console.log(data);
-
-    try {
-        const response = await CommentServices.createComment(data, token);
-        comments.value.unshift(response.data);
-        newComment.value = "";
-    } catch (error) {
-        console.error("Failed to create comment:", error);
-    }
-};
-
-const addReply = async (parentCommentId) => {
-    if (!newReply.value.trim()) return;
-
-    const token = JSON.parse(localStorage.getItem("authUser"));
-    const data = {
-        content: newReply.value,
-        postId: props.postId,
-        userId: props.userid,
-        parentCommentId: parentCommentId
-    };
-
-    try {
-        const response = await CommentServices.createComment(data, token);
-
-        // Đảm bảo replies của comment cha đúng
-        replies.value = {
-            ...replies.value,
-            [parentCommentId]: [...(replies.value[parentCommentId] || []), response.data]
-        };
-
-        // Reset ô input
-        newReply.value = "";
-        replyingTo.value = null;
-    } catch (error) {
-        console.error("Failed to create reply:", error);
-    }
-};
-
-
-onMounted(fetchComments);
-</script>
-<!-- gốc -->
+<style scoped>
+.relative {
+    position: relative;
+}
+</style>

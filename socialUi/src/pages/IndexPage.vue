@@ -64,15 +64,16 @@
     <PostDetail v-model="isPostOpen" :post="selectedPost" />
 
     <!-- Edit post Dialog -->
-    <EditPostDialog v-model="isEditDialogOpen" :editData="editData" @save="updateContent" />
-
+    <!-- <EditPostDialog v-model="isEditDialogOpen" :editData="editData" @save="updateContent" /> -->
+    <EditPostDialog v-model="isEditDialogOpen" :item="editData" :type="editData?.type || 'post'"
+      @save="updateContent" />
   </q-page>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { format } from "date-fns";
-import { PostServices, UserServices } from "src/services/api";
+import { CommentServices, PostServices, UserServices } from "src/services/api";
 import PostDetail from "src/components/PostDetail.vue";
 import ActionMenu from "src/components/ActionMenu.vue";
 import EditPostDialog from "src/components/EditPostDialog.vue";
@@ -83,7 +84,6 @@ const text = ref(''); // post content
 const dense = ref(false);
 const selectedPost = ref(null); // initialize selectedPost as null
 const isPostOpen = ref(false); // initialize isPostOpen as false
-
 const isEditDialogOpen = ref(false);
 const editData = ref(null);
 
@@ -174,36 +174,73 @@ const openPost = (post) => {
 };
 
 // action menu
-// open diaglog
 const openEditDialog = ({ item, type }) => {
-  editData.value = {
-    content: item.content,
-    postId: item.postId || item.post?.postId, // Make sure postId is included
-    type: type
-  };
+  editData.value = { ...item, type }; // Create a copy to avoid reference issues
   isEditDialogOpen.value = true;
 };
 
+const updateContent = async (updatedData) => {
+  try {
+    const token = JSON.parse(localStorage.getItem('authUser'));
+    if (!token) {
+      console.error('No authentication token found');
+      return;
+    }
 
-const updateContent = (updatedData) => {
-  if (updatedData.type === "post") {
-    // Find and update the post in the posts array
-    const postIndex = posts.value.findIndex(post => post.postId === updatedData.postId);
-    if (postIndex !== -1) {
-      // Update the content in the local posts array
-      posts.value[postIndex].content = updatedData.content;
-      // If the backend returns updated timestamp, update that too
-      if (updatedData.updatedAt) {
-        posts.value[postIndex].lastUpdated = updatedData.updatedAt;
+    if (updatedData.type === "post") {
+      // Get postId directly from updatedData which now contains the full item
+      const postId = updatedData.postId
+      const requestBody = {
+        content: updatedData.content,
+        post: {
+          postId: postId
+        }
+      }
+
+      // Make the API call to update the post
+      const response = await PostServices.updatePost(
+        requestBody,
+        token
+      );
+
+      // Find and update the post in the posts array
+      const postIndex = posts.value.findIndex(post => post.postId === postId);
+      if (postIndex !== -1) {
+        // Update the content in the local posts array
+        posts.value[postIndex].content = updatedData.content;
+        // Update timestamp from API response if available
+        if (response && response.lastUpdated) {
+          posts.value[postIndex].lastUpdated = response.lastUpdated;
+        }
+      }
+
+      // If we're in post detail view, update that as well
+      if (selectedPost.value && selectedPost.value.postId === postId) {
+        selectedPost.value.content = updatedData.content;
+        if (response && response.lastUpdated) {
+          selectedPost.value.lastUpdated = response.lastUpdated;
+        }
       }
     }
-    console.log("Post updated:", updatedData);
+    else if (updatedData.type === "comment") {
+      const commentId = updatedData.commentId;
+
+      if (!commentId) {
+        console.error('No comment ID found in the data:', updatedData);
+        return;
+      }
+
+      await CommentServices.updateComment(
+        commentId,
+        updatedData.content,
+        token
+      );
+    }
+  } catch (error) {
+    console.error('Error updating content:', error);
+  } finally {
+    isEditDialogOpen.value = false;
   }
-  if (updatedData.type === "comment") {
-    console.log("Comment updated:", updatedData);
-    // Similar logic for comments if needed
-  }
-  isEditDialogOpen.value = false;
 };
 
 

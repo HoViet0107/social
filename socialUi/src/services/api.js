@@ -53,7 +53,7 @@ export const PostServices = {
 
 export const CommentServices = {
     getComments(postId) {
-        return api.get(`/comments/${postId}?pageNumber=1&pageSize=10`);
+        return api.get(`/comments/${postId}?pageNumber=1&pageSize=10`)
     },
     getReplies(parentCommentId, postId) {
         return api.get(`/comments/reply/${parentCommentId}?postId=${postId}&pageNumber=1&pageSize=5`);
