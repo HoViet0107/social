@@ -37,7 +37,9 @@
             {{ post.user ? post.user.lastName : "Unknown" }}
           </div>
           <!-- action menu -->
-          <ActionMenu class="float-right" @edit="handleEdit" @remove="handleDelete" @report="handleReport" />
+          <ActionMenu class="float-right" :item="post" @edit="openEditDialog({ item: post, type: post.type })"
+            @remove="handleDelete" @report="handleReport" />
+
         </div>
         <div class="text-caption text-grey">
           Created at: {{ formatDate(post.createdAt) }}
@@ -60,6 +62,10 @@
     <!-- Post detail Dialog -->
     <!-- <PostDetail v-if="selectedPost" v-model="isPostOpen" :post="selectedPost" @close="isPostOpen = false" /> -->
     <PostDetail v-model="isPostOpen" :post="selectedPost" />
+
+    <!-- Edit post Dialog -->
+    <EditPostDialog v-model="isEditDialogOpen" :editData="editData" @save="updateContent" />
+
   </q-page>
 </template>
 
@@ -69,6 +75,7 @@ import { format } from "date-fns";
 import { PostServices, UserServices } from "src/services/api";
 import PostDetail from "src/components/PostDetail.vue";
 import ActionMenu from "src/components/ActionMenu.vue";
+import EditPostDialog from "src/components/EditPostDialog.vue";
 
 const posts = ref([]); // initialize posts as an empty array
 const text = ref(''); // post content
@@ -76,6 +83,9 @@ const text = ref(''); // post content
 const dense = ref(false);
 const selectedPost = ref(null); // initialize selectedPost as null
 const isPostOpen = ref(false); // initialize isPostOpen as false
+
+const isEditDialogOpen = ref(false);
+const editData = ref(null);
 
 // Call API when component is mounted to fetch posts
 const fetchPosts = async () => {
@@ -87,9 +97,11 @@ const fetchPosts = async () => {
       // Call API to fetch user for each post
       for (let post of posts.value) {
         if (post.userId) {
+          post.type = 'post'
           fetchUser(post);
         }
       }
+
     } else {
       console.error("An error occurred while fetching posts.");
     }
@@ -162,17 +174,72 @@ const openPost = (post) => {
 };
 
 // action menu
-const handleEdit = () => {
-  console.log("Chỉnh sửa bài viết/comment");
+// open diaglog
+const openEditDialog = ({ item, type }) => {
+  editData.value = {
+    content: item.content,
+    postId: item.postId || item.post?.postId, // Make sure postId is included
+    type: type
+  };
+  isEditDialogOpen.value = true;
 };
 
-const handleDelete = () => {
-  console.log("Xóa bài viết/comment");
+
+const updateContent = (updatedData) => {
+  if (updatedData.type === "post") {
+    // Find and update the post in the posts array
+    const postIndex = posts.value.findIndex(post => post.postId === updatedData.postId);
+    if (postIndex !== -1) {
+      // Update the content in the local posts array
+      posts.value[postIndex].content = updatedData.content;
+      // If the backend returns updated timestamp, update that too
+      if (updatedData.updatedAt) {
+        posts.value[postIndex].lastUpdated = updatedData.updatedAt;
+      }
+    }
+    console.log("Post updated:", updatedData);
+  }
+  if (updatedData.type === "comment") {
+    console.log("Comment updated:", updatedData);
+    // Similar logic for comments if needed
+  }
+  isEditDialogOpen.value = false;
 };
 
-const handleReport = () => {
-  console.log("Báo cáo bài viết/comment");
-}; // end
+
+// delete post or comment
+const handleDelete = async (post) => {
+  // Determine the type from the post object
+  const type = post.type || 'post';
+
+  if (confirm(`Are you sure you want to delete this ${type}?`)) {
+    try {
+      const token = JSON.parse(localStorage.getItem('authUser'));
+      if (!token) {
+        console.error('No authentication token found');
+        return;
+      }
+
+      if (type === "post") {
+        await PostServices.deletePost(post.postId, token);
+        // Remove the post from the local array
+        posts.value = posts.value.filter(p => p.postId !== post.postId);
+        console.log("Post deleted successfully");
+      } else if (type === "comment") {
+        // Handle comment deletion if needed
+        console.log("Comment deleted!");
+      }
+    } catch (error) {
+      console.error("Failed to delete:", error);
+    }
+  }
+};
+
+
+// report post or comment
+const handleReport = ({ item, type }) => {
+  console.log(`${type === "post" ? "Post" : "Comment"} Reported:`, item);
+};
 
 // Call API when component is loaded
 onMounted(fetchPosts);

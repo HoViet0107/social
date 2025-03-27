@@ -35,11 +35,19 @@ export const PostServices = {
             }
         });
     },
-    updatePost(data) {
-        return api.put(`/posts`, data);
+    updatePost(data, token) {
+        return api.put(`/posts`, data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
     },
-    deletePost(postId) {
-        return api.put(`/posts/${postId}/status`);
+    deletePost(postId, token) {
+        return api.put(`/posts/${postId}/status`, {}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
     }
 };
 
