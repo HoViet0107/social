@@ -87,37 +87,42 @@ const toggleReplyForm = (commentId) => {
 };
 
 // Add reply function
-const addReply = async (commentId = null) => {
+const addReply = async (commentId = 0) => {
     try {
         const token = JSON.parse(localStorage.getItem('authUser'));
         if (!token || !newReply.value.trim()) {
             console.error('Token is missing or reply content is empty.');
             return;
         }
-        console.log(commentId);
 
         const requestData = {
             postId: props.postId,
             content: newReply.value,
             parentCommentId: commentId
         };
-        console.log(requestData);
 
         const response = await CommentServices.createComment(
             requestData,
             token
         );
-
-        // Add the new reply to the local state
-        if (!replies.value[commentId]) {
-            replies.value[commentId] = [];
-        }
-
-        // Handle different response formats
-        if (response && response.data) {
-            replies.value[commentId].push(response.data);
+        if (commentId === 0 || commentId === null) {
+            // if commentId is 0, it's a new comment
+            if (response && response.data) {
+                comments.value.unshift(response.data); // add to comments array
+            } else {
+                console.error('Unexpected response format:', response);
+            }
         } else {
-            replies.value[commentId].push(response);
+            // Add the new reply to the local state
+            if (!replies.value[commentId]) {
+                replies.value[commentId] = [];
+            }
+            // Handle different response formats
+            if (response && response.data) {
+                replies.value[commentId].unshift(response.data);
+            } else {
+                replies.value[commentId].push(response);
+            }
         }
 
         // Clear the input and reset replyingTo
@@ -207,7 +212,7 @@ const handleDelete = async (item) => {
         <div v-if="!loading" class="q-pa-md">
             <q-input v-model="newReply" label="Add a comment..." dense outlined class="q-mb-md">
                 <template v-slot:append>
-                    <q-btn icon="send" dense flat @click="addReply(null)" />
+                    <q-btn icon="send" dense flat @click="addReply(0)" />
                 </template>
             </q-input>
         </div>
@@ -220,8 +225,8 @@ const handleDelete = async (item) => {
         <div v-for="comment in comments" :key="comment.commentId">
             <q-card flat bordered class="q-pa-sm">
                 <q-card-section class="relative">
-                    <ActionMenu :item="{ ...comment, type: 'comment' }" @edit="handleCommentEdit"
-                        @remove="handleCommentDelete" @report="handleCommentReport" />
+                    <ActionMenu :item="{ ...comment, type: 'comment' }" @edit="handleCommentEdit" @remove="handleDelete"
+                        @report="handleCommentReport" />
                     <div class="text-bold">User ID: {{ comment.userId }} - Cmt ID: {{ comment.commentId }}</div>
                     <div class="text-body2">{{ comment.content }}</div>
                 </q-card-section>
@@ -250,7 +255,7 @@ const handleDelete = async (item) => {
                         <q-card flat bordered class="q-pa-sm">
                             <q-card-section class="relative">
                                 <ActionMenu :item="{ ...reply, type: 'reply', parentCommentId: comment.commentId }"
-                                    @edit="handleCommentEdit" @remove="handleReplyDelete" @report="handleReplyReport" />
+                                    @edit="handleReplyEdit" @remove="handleDelete" @report="handleReplyReport" />
                                 <div class="text-bold">User ID: {{ reply.userId }} - Reply ID: {{ reply.commentId }}
                                 </div>
                                 <div class="text-body2">{{ reply.content }}</div>

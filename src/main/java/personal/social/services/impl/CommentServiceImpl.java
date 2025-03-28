@@ -23,7 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+//@Transactional
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepos;
     private final UserRepository userRepos;
@@ -101,32 +101,35 @@ public class CommentServiceImpl implements CommentService {
         // create comment obj
         Comment newComment = new Comment();
         // get parent comment
-        Comment parentComment = new Comment();
-        if(commentDTO.getParentCommentId() != null){
-            parentComment = commentRepos.findById(commentDTO.getParentCommentId()).orElse(null);
-        }
+        Optional<Comment> parentComment = commentRepos.findById(commentDTO.getParentCommentId());
         newComment.setCommentStatus(Status.ACTIVE);
         newComment.setCreatedAt(currentTime);
         newComment.setLastUpdated(currentTime);
         newComment.setPost(postRepos.findByPostId(commentDTO.getPostId()));
         newComment.setUser(user);
-        newComment.setParentComment(parentComment);
+        newComment.setParentComment(parentComment.orElse(null));
+        try {
+            commentRepos.save(newComment); // save to database
+        } catch (Exception e) {
+            throw new RuntimeException("Faile to create comment: " + e.getMessage());
+        }
 
-        Comment savedCmt = commentRepos.save(newComment); // save to database
-        System.out.println(savedCmt);
         // create content for comment
         CommentContent cmtContent = new CommentContent();
-        cmtContent.setComment(savedCmt);
+        cmtContent.setComment(newComment);
         cmtContent.setContent(commentDTO.getContent());
         cmtContent.setLastUpdated(currentTime);
-        cmtContentRepos.save(cmtContent); // save to database
-
+        try {
+            cmtContentRepos.save(cmtContent); // save to database
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create comment: " + e.getMessage());
+        }
         // set time and status to commentDTO
-        commentDTO.setCommentId(savedCmt.getCommentId());
-        commentDTO.setCommentStatus(savedCmt.getCommentStatus());
-        commentDTO.setCreatedAt(savedCmt.getCreatedAt());
-        commentDTO.setLikes(savedCmt.getLikes());
-        commentDTO.setDislikes(savedCmt.getDislikes());
+        commentDTO.setCommentId(newComment.getCommentId());
+        commentDTO.setCommentStatus(newComment.getCommentStatus());
+        commentDTO.setCreatedAt(newComment.getCreatedAt());
+        commentDTO.setLikes(newComment.getLikes());
+        commentDTO.setDislikes(newComment.getDislikes());
 
         return commentDTO;
     }
@@ -232,10 +235,10 @@ public class CommentServiceImpl implements CommentService {
             throw new RuntimeException(String.format("User %s doesn't have permission to edit this comment", user.getUserId()));
         }
 
-        if (existedComment.getCommentStatus().equals(Status.ACTIVE)){
+        if (existedComment.getCommentStatus().equals(Status.ACTIVE)) {
             existedComment.setCommentStatus(Status.INACTIVE);
             commentRepos.save(existedComment);
-        }else {
+        } else {
             existedComment.setCommentStatus(Status.ACTIVE);
             commentRepos.save(existedComment);
             return "Recover comment success!";

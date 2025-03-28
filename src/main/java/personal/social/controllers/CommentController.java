@@ -36,7 +36,7 @@ public class CommentController {
     }
 
     @PostMapping
-    @Transactional
+//    @Transactional
     public ResponseEntity<?> createComment(
             @RequestBody CommentDTO commentDTO,
             HttpServletRequest request) {
