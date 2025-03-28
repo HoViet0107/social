@@ -62,6 +62,11 @@ export const CommentServices = {
         return api.post(`/comments`, data, {
             headers: { Authorization: `Bearer ${token}` }
         });
+    },
+    editComment(data, token) {
+        return api.put(`/comments/${data.commentId}`, data, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
     }
 };
 

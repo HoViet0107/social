@@ -2,6 +2,8 @@
 import { CommentServices } from 'src/services/api';
 import ActionMenu from './ActionMenu.vue';
 import { ref, onMounted } from 'vue';
+import EditPostDialog from './EditPostDialog.vue';
+import { defineProps } from 'vue';
 
 // Define props
 const props = defineProps({
@@ -23,6 +25,9 @@ const replies = ref({});
 const replyingTo = ref(null);
 const newReply = ref('');
 const showReplies = ref({});
+
+const showEditDialog = ref(false);
+const currentEditItem = ref(null);
 
 // Fetch comments
 const fetchComments = async () => {
@@ -127,12 +132,57 @@ onMounted(async () => {
 });
 
 // Handlers
-const handleCommentEdit = (comment) => {
-    console.log('Edit comment:', comment);
+const handleCommentEdit = (data) => {
+    currentEditItem.value = data.item;
+    showEditDialog.value = true;
 };
 
-const handleReplyEdit = (reply) => {
-    console.log('Edit reply:', reply);
+// Function to save edited comment
+const handleEditSave = async (updatedItem) => {
+    try {
+        const token = JSON.parse(localStorage.getItem('authUser'));
+        if (!token) return;
+
+        const response = await CommentServices.editComment(updatedItem, token);
+
+        // Handle different response formats
+        const updatedContent = response.data || response;
+
+        // Update the comment in the local state
+        if (updatedItem.type === 'comment') {
+            const commentIndex = comments.value.findIndex(c => c.commentId === updatedItem.commentId);
+            if (commentIndex !== -1) {
+                // Merge the existing comment with the updated content
+                comments.value[commentIndex] = {
+                    ...comments.value[commentIndex],
+                    ...updatedContent
+                };
+                // Force reactivity update
+                comments.value = [...comments.value];
+            }
+        } else if (updatedItem.type === 'reply') {
+            const parentCommentId = updatedItem.parentCommentId;
+            if (replies.value[parentCommentId]) {
+                const replyIndex = replies.value[parentCommentId].findIndex(
+                    r => r.commentId === updatedItem.commentId
+                );
+                if (replyIndex !== -1) {
+                    // Merge the existing reply with the updated content
+                    replies.value[parentCommentId][replyIndex] = {
+                        ...replies.value[parentCommentId][replyIndex],
+                        ...updatedContent
+                    };
+                    // Force reactivity update
+                    replies.value = { ...replies.value };
+                }
+            }
+        }
+
+        // Close the dialog
+        showEditDialog.value = false;
+    } catch (error) {
+        console.error('Error editing comment:', error);
+    }
 };
 
 const handleCommentReport = (comment) => {
@@ -176,14 +226,19 @@ const handleReplyDelete = async (reply) => {
             No comments yet. Be the first to comment!
         </div>
 
+        <!-- Add EditPostDialog component (only once) -->
+        <EditPostDialog v-model="showEditDialog" :item="currentEditItem" :type="currentEditItem?.type || 'comment'"
+            @save="handleEditSave" />
+
         <!-- Comments section -->
         <div v-for="comment in comments" :key="comment.commentId">
             <q-card flat bordered class="q-pa-sm">
                 <q-card-section class="relative">
-                    <ActionMenu :item="comment" @edit="handleCommentEdit" @remove="handleCommentDelete"
-                        @report="handleCommentReport" />
+                    <ActionMenu :item="{ ...comment, type: 'comment' }" @edit="handleCommentEdit"
+                        @remove="handleCommentDelete" @report="handleCommentReport" />
                     <div class="text-bold">User ID: {{ comment.userId }} - Cmt ID: {{ comment.commentId }}</div>
-                    <div class="text-body2">{{ comment.content }}</div>
+                    <div class="text-body2">{{ comment.content || '' }}</div>
+
                 </q-card-section>
 
                 <!-- Reply actions -->
@@ -209,13 +264,12 @@ const handleReplyDelete = async (reply) => {
                     <div v-for="reply in replies[comment.commentId]" :key="reply.commentId" class="q-mb-md">
                         <q-card flat bordered class="q-pa-sm">
                             <q-card-section class="relative">
-                                <ActionMenu :item="reply" @edit="handleReplyEdit" @remove="handleReplyDelete"
-                                    @report="handleReplyReport" />
-                                <div class="text-bold">
-                                    <span class="text-grey">Reply ID:</span> {{ reply.commentId }} -
-                                    <span class="text-grey">Reply to:</span> {{ reply.parentCommentId }}
+                                <ActionMenu :item="{ ...reply, type: 'reply', parentCommentId: comment.commentId }"
+                                    @edit="handleCommentEdit" @remove="handleReplyDelete" @report="handleReplyReport" />
+                                <div class="text-bold">User ID: {{ reply.userId }} - Reply ID: {{ reply.commentId }}
                                 </div>
-                                <div class="text-body2">{{ reply.content }}</div>
+
+                                <div class="text-body2">{{ reply.content || '' }}</div>
                             </q-card-section>
                         </q-card>
                     </div>
@@ -224,6 +278,7 @@ const handleReplyDelete = async (reply) => {
         </div>
     </div>
 </template>
+
 
 <style scoped>
 .relative {
