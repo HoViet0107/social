@@ -57,24 +57,18 @@ watch(() => props.item, (newVal) => {
     }
 }, { immediate: true });
 
+// In EditPostDialog.vue
 const saveChanges = () => {
-    if (!content.value.trim()) return; // return if empty content
+    // Create a copy of the original item and update only the content
+    const updatedItem = { ...props.item, content: content.value };
 
-    // Create a copy of the original item and update the content
-    const updatedItem = {
-        ...props.item,
-        content: content.value.trim(),
+    emit('save', {
+        ...updatedItem,
         type: props.type
-    };
+    });
 
-    // Emit the save event with the updated item
-    emit('save', updatedItem);
-
-    // Reset and close the dialog
-    content.value = '';
     dialog.value = false;
 };
-
 
 
 const getDialogTitle = () => {
