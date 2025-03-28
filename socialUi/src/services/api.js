@@ -67,7 +67,12 @@ export const CommentServices = {
         return api.put(`/comments/${data.commentId}`, data, {
             headers: { Authorization: `Bearer ${token}` }
         });
-    }
+    },
+    deleteComment(data, token) {
+        return api.put(`/comments/${data.commentId}/delete`, data, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+    },
 };
 
 

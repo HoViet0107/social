@@ -69,6 +69,8 @@ const toggleReplies = async (commentId) => {
     if (showReplies.value[commentId] && (!replies.value[commentId] || replies.value[commentId].length === 0)) {
         try {
             const response = await CommentServices.getReplies(commentId, props.postId);
+            console.log('Raw API response for replies:', response);
+
             if (Array.isArray(response)) {
                 replies.value[commentId] = response;
             } else if (response && Array.isArray(response.data)) {
@@ -90,17 +92,24 @@ const toggleReplyForm = (commentId) => {
 };
 
 // Add reply function
-const addReply = async (commentId) => {
+const addReply = async (commentId = null) => {
     try {
         const token = JSON.parse(localStorage.getItem('authUser'));
         if (!token || !newReply.value.trim()) {
+            console.error('Token is missing or reply content is empty.');
             return;
         }
+        console.log(commentId);
 
-        const response = await CommentServices.addReply(
-            commentId,
-            props.postId,
-            newReply.value,
+        const requestData = {
+            postId: props.postId,
+            content: newReply.value,
+            parentCommentId: commentId
+        };
+        console.log(requestData);
+
+        const response = await CommentServices.createComment(
+            requestData,
             token
         );
 
@@ -193,33 +202,64 @@ const handleReplyReport = (reply) => {
     console.log('Report reply:', reply);
 };
 
-const handleCommentDelete = async (comment) => {
+const handleDelete = async (item) => {
     try {
-        console.log('comment deleted: ', comment);
+        const token = JSON.parse(localStorage.getItem('authUser'));
+        if (!token) return;
 
+        // Create update object with INACTIVE status
+        const updateData = {
+            commentId: item.commentId,
+            type: item.type // 'comment' or 'reply'
+        };
+        console.log('Delete item:', updateData);
+
+        const response = await CommentServices.deleteComment(updateData, token);
+        if (response && response.data) {
+            console.log(response.data);
+        }
+        // Remove from UI based on type
+        if (item.type === 'comment') {
+            // Remove comment from comments array
+            const index = comments.value.findIndex(c => c.commentId === item.commentId);
+            if (index !== -1) {
+                comments.value.splice(index, 1);
+            }
+        } else if (item.type === 'reply') {
+            // Remove reply from replies object
+            const parentCommentId = item.parentCommentId;
+            if (replies.value[parentCommentId]) {
+                const replyIndex = replies.value[parentCommentId].findIndex(
+                    r => r.commentId === item.commentId
+                );
+                if (replyIndex !== -1) {
+                    replies.value[parentCommentId].splice(replyIndex, 1);
+                    // Force reactivity update
+                    replies.value = { ...replies.value };
+                }
+            }
+        }
     } catch (error) {
-        console.error('Error deleting comment:', error);
+        console.error('Error deleting item:', error);
     }
 };
 
-const handleReplyDelete = async (reply) => {
-    try {
-        console.log('Deleted', reply);
-    } catch (error) {
-        console.error('Error deleting reply:', error);
-    }
-};
 </script>
 
 <template>
     <div>
-        <div v-if="error" class="text-negative q-pa-md">
-            {{ error }}
-        </div>
-
         <div v-if="loading" class="text-center q-pa-md">
             <q-spinner color="primary" size="2em" />
             <div>Loading comments...</div>
+        </div>
+
+        <!-- Add new comment -->
+        <div v-if="!loading" class="q-pa-md">
+            <q-input v-model="newReply" label="Add a comment..." dense outlined class="q-mb-md">
+                <template v-slot:append>
+                    <q-btn icon="send" dense flat @click="addReply(null)" />
+                </template>
+            </q-input>
         </div>
 
         <div v-if="!loading && comments.length === 0" class="text-center q-pa-md">
@@ -234,8 +274,8 @@ const handleReplyDelete = async (reply) => {
         <div v-for="comment in comments" :key="comment.commentId">
             <q-card flat bordered class="q-pa-sm">
                 <q-card-section class="relative">
-                    <ActionMenu :item="{ ...comment, type: 'comment' }" @edit="handleCommentEdit"
-                        @remove="handleCommentDelete" @report="handleCommentReport" />
+                    <ActionMenu :item="{ ...comment, type: 'comment' }" @edit="handleCommentEdit" @remove="handleDelete"
+                        @report="handleCommentReport" />
                     <div class="text-bold">User ID: {{ comment.userId }} - Cmt ID: {{ comment.commentId }}</div>
                     <div class="text-body2">{{ comment.content || '' }}</div>
 
@@ -265,7 +305,7 @@ const handleReplyDelete = async (reply) => {
                         <q-card flat bordered class="q-pa-sm">
                             <q-card-section class="relative">
                                 <ActionMenu :item="{ ...reply, type: 'reply', parentCommentId: comment.commentId }"
-                                    @edit="handleCommentEdit" @remove="handleReplyDelete" @report="handleReplyReport" />
+                                    @edit="handleCommentEdit" @remove="handleDelete" @report="handleReplyReport" />
                                 <div class="text-bold">User ID: {{ reply.userId }} - Reply ID: {{ reply.commentId }}
                                 </div>
 

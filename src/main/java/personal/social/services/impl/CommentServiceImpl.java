@@ -1,5 +1,6 @@
 package personal.social.services.impl;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepos;
     private final UserRepository userRepos;
@@ -99,35 +101,32 @@ public class CommentServiceImpl implements CommentService {
         // create comment obj
         Comment newComment = new Comment();
         // get parent comment
-        Optional<Comment> parentComment = commentRepos.findById(commentDTO.getParentCommentId());
+        Comment parentComment = new Comment();
+        if(commentDTO.getParentCommentId() != null){
+            parentComment = commentRepos.findById(commentDTO.getParentCommentId()).orElse(null);
+        }
         newComment.setCommentStatus(Status.ACTIVE);
         newComment.setCreatedAt(currentTime);
         newComment.setLastUpdated(currentTime);
         newComment.setPost(postRepos.findByPostId(commentDTO.getPostId()));
         newComment.setUser(user);
-        newComment.setParentComment(parentComment.orElse(null));
-        try {
-            commentRepos.save(newComment); // save to database
-        } catch (Exception e) {
-            throw new RuntimeException("Faile to create comment: " + e.getMessage());
-        }
+        newComment.setParentComment(parentComment);
 
+        Comment savedCmt = commentRepos.save(newComment); // save to database
+        System.out.println(savedCmt);
         // create content for comment
         CommentContent cmtContent = new CommentContent();
-        cmtContent.setComment(newComment);
+        cmtContent.setComment(savedCmt);
         cmtContent.setContent(commentDTO.getContent());
         cmtContent.setLastUpdated(currentTime);
-        try {
-            cmtContentRepos.save(cmtContent); // save to database
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create comment: " + e.getMessage());
-        }
+        cmtContentRepos.save(cmtContent); // save to database
+
         // set time and status to commentDTO
-        commentDTO.setCommentId(newComment.getCommentId());
-        commentDTO.setCommentStatus(newComment.getCommentStatus());
-        commentDTO.setCreatedAt(newComment.getCreatedAt());
-        commentDTO.setLikes(newComment.getLikes());
-        commentDTO.setDislikes(newComment.getDislikes());
+        commentDTO.setCommentId(savedCmt.getCommentId());
+        commentDTO.setCommentStatus(savedCmt.getCommentStatus());
+        commentDTO.setCreatedAt(savedCmt.getCreatedAt());
+        commentDTO.setLikes(savedCmt.getLikes());
+        commentDTO.setDislikes(savedCmt.getDislikes());
 
         return commentDTO;
     }
@@ -158,13 +157,6 @@ public class CommentServiceImpl implements CommentService {
 
         // Check for content changes
         boolean contentChanged = !existedCmtContent.getContent().equals(commentDTO.getContent());
-
-        // Check for status changes
-        if (commentDTO.getCommentStatus() != null &&
-                !existedComment.getCommentStatus().equals(commentDTO.getCommentStatus())) {
-            existedComment.setCommentStatus(commentDTO.getCommentStatus());
-            hasChanges = true;
-        }
 
         // Check for likes changes
         if (commentDTO.getLikes() != null &&
@@ -225,4 +217,29 @@ public class CommentServiceImpl implements CommentService {
         );
     }
 
+    @Override
+    public String deleteComment(CommentDTO commentDTO, User user) {
+        // Get existed comment
+        Comment existedComment = commentRepos.findByCommentId(commentDTO.getCommentId());
+
+        // Check if comment exists
+        if (existedComment == null) {
+            throw new RuntimeException("Comment not found with ID: " + commentDTO.getCommentId());
+        }
+
+        // Check if user has permission
+        if (!existedComment.getUser().equals(user)) {
+            throw new RuntimeException(String.format("User %s doesn't have permission to edit this comment", user.getUserId()));
+        }
+
+        if (existedComment.getCommentStatus().equals(Status.ACTIVE)){
+            existedComment.setCommentStatus(Status.INACTIVE);
+            commentRepos.save(existedComment);
+        }else {
+            existedComment.setCommentStatus(Status.ACTIVE);
+            commentRepos.save(existedComment);
+            return "Recover comment success!";
+        }
+        return "Comment deleted!";
+    }
 }

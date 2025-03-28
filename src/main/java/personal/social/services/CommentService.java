@@ -12,4 +12,6 @@ public interface CommentService {
     CommentDTO createComment(CommentDTO commentDTO, User user);
 
     CommentDTO editComment(CommentDTO commentDTO, User user);
+
+    String deleteComment(CommentDTO commentDTO, User user);
 }
