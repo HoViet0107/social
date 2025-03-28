@@ -29,7 +29,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentContentRepository cmtContentRepos;
 
     @Autowired
-    public CommentServiceImpl (
+    public CommentServiceImpl(
             CommentRepository commentRepos,
             UserRepository userRepos,
             PostRepository postRepos,
@@ -43,12 +43,12 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentDTO> getParentComments(Long postId, Integer pageNumber, Integer pageSize) {
         // throw exception if post not found
-        if(postRepos.findByPostId(postId) == null){
+        if (postRepos.findByPostId(postId) == null) {
             throw new RuntimeException("Post not found!");
         }
         List<Object[]> results = commentRepos.findTopLevelComments(postId, pageNumber, pageSize);
         // throw exception if post have no comment
-        if(results.isEmpty()){
+        if (results.isEmpty()) {
             throw new RuntimeException("Post have no comment!");
         }
         return results.stream().map(obj -> new CommentDTO(
@@ -68,14 +68,14 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public List<CommentDTO> getCommentReplies(Long postId, Integer pageNumber, Integer pageSize, Long parentCmtId) {
         // throw exception if parent comment not found
-        if(commentRepos.findById(parentCmtId) == null){
+        if (commentRepos.findById(parentCmtId) == null) {
             throw new RuntimeException("Service: Comment not found!");
         }
 
         List<Object[]> results = commentRepos.findCommentReplies(postId, pageNumber, pageSize, parentCmtId);
 
         // throw exception if post have no comment
-        if(results.isEmpty()){
+        if (results.isEmpty()) {
             throw new RuntimeException("Service: Comment have no replies!");
         }
 
@@ -106,10 +106,10 @@ public class CommentServiceImpl implements CommentService {
         newComment.setPost(postRepos.findByPostId(commentDTO.getPostId()));
         newComment.setUser(user);
         newComment.setParentComment(parentComment.orElse(null));
-        try{
+        try {
             commentRepos.save(newComment); // save to database
-        }catch (Exception e){
-            throw new RuntimeException("Faile to create comment: "+e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Faile to create comment: " + e.getMessage());
         }
 
         // create content for comment
@@ -117,9 +117,9 @@ public class CommentServiceImpl implements CommentService {
         cmtContent.setComment(newComment);
         cmtContent.setContent(commentDTO.getContent());
         cmtContent.setLastUpdated(currentTime);
-        try{
+        try {
             cmtContentRepos.save(cmtContent); // save to database
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Failed to create comment: " + e.getMessage());
         }
         // set time and status to commentDTO
@@ -131,4 +131,98 @@ public class CommentServiceImpl implements CommentService {
 
         return commentDTO;
     }
+
+    @Override
+    public CommentDTO editComment(CommentDTO commentDTO, User user) {
+        // Get existed comment
+        Comment existedComment = commentRepos.findByCommentId(commentDTO.getCommentId());
+
+        // Check if comment exists
+        if (existedComment == null) {
+            throw new RuntimeException("Comment not found with ID: " + commentDTO.getCommentId());
+        }
+
+        // Check if user has permission
+        if (!existedComment.getUser().equals(user)) {
+            throw new RuntimeException(String.format("User %s doesn't have permission to edit this comment", user.getUserId()));
+        }
+
+        LocalDateTime currentTime = LocalDateTime.now();
+
+        // Get existing comment content
+        CommentContent existedCmtContent = cmtContentRepos.findByCommentCommentIdAndLastUpdated(
+                commentDTO.getCommentId(), existedComment.getLastUpdated()
+        );
+
+        boolean hasChanges = false;
+
+        // Check for content changes
+        boolean contentChanged = !existedCmtContent.getContent().equals(commentDTO.getContent());
+
+        // Check for status changes
+        if (commentDTO.getCommentStatus() != null &&
+                !existedComment.getCommentStatus().equals(commentDTO.getCommentStatus())) {
+            existedComment.setCommentStatus(commentDTO.getCommentStatus());
+            hasChanges = true;
+        }
+
+        // Check for likes changes
+        if (commentDTO.getLikes() != null &&
+                !existedComment.getLikes().equals(commentDTO.getLikes())) {
+            existedComment.setLikes(commentDTO.getLikes());
+            hasChanges = true;
+        }
+
+        // Check for dislikes changes
+        if (commentDTO.getDislikes() != null &&
+                !existedComment.getDislikes().equals(commentDTO.getDislikes())) {
+            existedComment.setDislikes(commentDTO.getDislikes());
+            hasChanges = true;
+        }
+
+        // If content changed or other properties changed
+        if (contentChanged || hasChanges) {
+            // Update timestamp
+            existedComment.setLastUpdated(currentTime);
+
+            // Save comment changes
+            commentRepos.save(existedComment);
+
+            // If content changed, create new content record
+            if (contentChanged) {
+                CommentContent newCmtContent = new CommentContent(commentDTO.getContent(), currentTime, existedComment);
+                cmtContentRepos.save(newCmtContent);
+            }
+
+            // Create response DTO
+            CommentDTO updatedDto = new CommentDTO(
+                    existedComment.getCommentId(),
+                    existedComment.getCreatedAt(),
+                    existedComment.getLastUpdated(),
+                    existedComment.getCommentStatus(),
+                    existedComment.getLikes(),
+                    existedComment.getDislikes(),
+                    contentChanged ? commentDTO.getContent() : existedCmtContent.getContent(),
+                    existedComment.getUser().getUserId(),
+                    existedComment.getPost().getPostId(),
+                    existedComment.getParentComment() != null ? existedComment.getParentComment().getCommentId() : null
+            );
+            return updatedDto;
+        }
+
+        // If no changes, return the original DTO with current values
+        return new CommentDTO(
+                existedComment.getCommentId(),
+                existedComment.getCreatedAt(),
+                existedComment.getLastUpdated(),
+                existedComment.getCommentStatus(),
+                existedComment.getLikes(),
+                existedComment.getDislikes(),
+                existedCmtContent.getContent(),
+                existedComment.getUser().getUserId(),
+                existedComment.getPost().getPostId(),
+                existedComment.getParentComment() != null ? existedComment.getParentComment().getCommentId() : null
+        );
+    }
+
 }

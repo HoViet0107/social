@@ -2,6 +2,9 @@ package personal.social.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import personal.social.enums.Status;
+import personal.social.model.Comment;
+import personal.social.model.Post;
+import personal.social.model.User;
 
 import java.time.LocalDateTime;
 
@@ -31,23 +34,22 @@ public class CommentDTO {
 
     public CommentDTO(){}
 
-    public CommentDTO(Long commentId, LocalDateTime createdAt, LocalDateTime lastUpdated, Status commentStatus, Long likes, Long dislikes, String content, Long userId, Long postId) {
-        this.commentId = commentId;
-        this.createdAt = createdAt;
-        this.lastUpdated = lastUpdated;
-        this.commentStatus = commentStatus;
-        this.likes = likes;
-        this.dislikes = dislikes;
-        this.content = content;
-        this.userId = userId;
-        this.postId = postId;
-    }
 
     public CommentDTO(Long commentId, LocalDateTime createdAt,LocalDateTime lastUpdated, Status commentStatus, Long likes, Long dislikes, String content, Long userId, Long postId, Long parentCommentId) {
         this.commentId = commentId;
         this.createdAt = createdAt;
         this.commentStatus = commentStatus;
         this.lastUpdated = lastUpdated;
+        this.likes = likes;
+        this.dislikes = dislikes;
+        this.content = content;
+        this.userId = userId;
+        this.postId = postId;
+        this.parentCommentId = parentCommentId;
+    }
+
+    public CommentDTO(Long commentId, Long likes, Long dislikes, String content, Long userId, Long postId, Long parentCommentId) {
+        this.commentId = commentId;
         this.likes = likes;
         this.dislikes = dislikes;
         this.content = content;

@@ -81,4 +81,28 @@ public class CommentController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PutMapping("/{commentId}")
+    public ResponseEntity<?> editComment(
+            @RequestBody CommentDTO commentDTO,
+            HttpServletRequest request
+    ){
+        // extract token
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // get token without "Bearer "
+        } else {
+            throw new RuntimeException("Missing or invalid Authorization header");
+        }
+        if(jwtUtil.isTokenExpired(token)){
+            return ResponseEntity.badRequest().body("Token expired!");
+        }
+        // get user by email
+        User user = userRepos.findByEmail(jwtUtil.extractEmail(token));
+        try{
+            return ResponseEntity.ok(commentService.editComment(commentDTO, user));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("An error occur: "+ e.getMessage());
+        }
+    }
 }

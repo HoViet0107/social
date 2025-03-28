@@ -10,4 +10,6 @@ public interface CommentService {
     List<CommentDTO> getCommentReplies(Long postId, Integer pageNumber, Integer pageSize, Long parentCmtId);
 
     CommentDTO createComment(CommentDTO commentDTO, User user);
+
+    CommentDTO editComment(CommentDTO commentDTO, User user);
 }

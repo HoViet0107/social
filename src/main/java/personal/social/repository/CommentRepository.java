@@ -24,4 +24,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
             @Param("pageSize") Integer pageSize,
             @Param("parentCmtId") Long parentCmtId
     );
+
+    Comment findByCommentId(Long commentId);
 }
