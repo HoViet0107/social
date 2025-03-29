@@ -2,6 +2,7 @@
 import { CommentServices } from 'src/services/api';
 import ActionMenu from './ActionMenu.vue';
 import { ref, onMounted } from 'vue';
+import EditPostDialog from './EditPostDialog.vue';
 
 // Define props
 const props = defineProps({
@@ -23,6 +24,8 @@ const replies = ref({});
 const replyingTo = ref(null);
 const newReply = ref('');
 const showReplies = ref({});
+const isEditDialogOpen = ref(false);// for edit dialog
+const editData = ref(null); // for edit dialog data
 
 // Fetch comments
 const fetchComments = async () => {
@@ -136,18 +139,84 @@ const addReply = async (commentId = 0) => {
     }
 };
 
+// Edit content function
+const updateContent = async (updatedData) => {
+    try {
+        const token = JSON.parse(localStorage.getItem('authUser'));
+        if (!token) {
+            console.error('No authentication token found');
+            return;
+        }
+
+        // Log the received data
+        console.log('Received update data:', updatedData);
+
+        if (!updatedData.commentId) {
+            console.error('Comment ID is missing');
+            return;
+        }
+
+        if (updatedData.type === "reply" || updatedData.type === "comment") {
+            const requestBody = {
+                commentId: updatedData.commentId,
+                content: updatedData.content,
+                postId: props.postId,
+                parentCommentId: updatedData.parentCommentId
+            };
+
+            // Make the API call to update the comment
+            const response = await CommentServices.editComment(
+                requestBody,
+                token
+            );
+
+            if (response && response.data) {
+                // Update UI based on comment type
+                if (updatedData.type === "comment") {
+                    const commentIndex = comments.value.findIndex(
+                        comment => comment.commentId === updatedData.commentId
+                    );
+                    if (commentIndex !== -1) {
+                        comments.value[commentIndex] = {
+                            ...comments.value[commentIndex],
+                            content: updatedData.content
+                        };
+                    }
+                } else {
+                    // Update in replies object
+                    const parentCommentId = updatedData.parentCommentId;
+                    if (replies.value[parentCommentId]) {
+                        const replyIndex = replies.value[parentCommentId].findIndex(
+                            reply => reply.commentId === updatedData.commentId
+                        );
+                        if (replyIndex !== -1) {
+                            replies.value[parentCommentId][replyIndex] = {
+                                ...replies.value[parentCommentId][replyIndex],
+                                content: updatedData.content
+                            };
+                            // Force reactivity update
+                            replies.value = { ...replies.value };
+                        }
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error updating content:', error);
+    } finally {
+        isEditDialogOpen.value = false;
+    }
+};
+
 onMounted(async () => {
     await fetchComments();
 });
-
-// Handlers
-const handleCommentEdit = (comment) => {
-    console.log('Edit comment:', comment);
+// handlers for action menu
+const handleContentEdit = ({ item, type }) => {
+    editData.value = { ...item, type };
+    isEditDialogOpen.value = true;
 };
 
-const handleReplyEdit = (reply) => {
-    console.log('Edit reply:', reply);
-};
 
 const handleCommentReport = (comment) => {
     console.log('Report comment:', comment);
@@ -225,7 +294,7 @@ const handleDelete = async (item) => {
         <div v-for="comment in comments" :key="comment.commentId">
             <q-card flat bordered class="q-pa-sm">
                 <q-card-section class="relative">
-                    <ActionMenu :item="{ ...comment, type: 'comment' }" @edit="handleCommentEdit" @remove="handleDelete"
+                    <ActionMenu :item="{ ...comment, type: 'comment' }" @edit="handleContentEdit" @remove="handleDelete"
                         @report="handleCommentReport" />
                     <div class="text-bold">User ID: {{ comment.userId }} - Cmt ID: {{ comment.commentId }}</div>
                     <div class="text-body2">{{ comment.content }}</div>
@@ -255,7 +324,7 @@ const handleDelete = async (item) => {
                         <q-card flat bordered class="q-pa-sm">
                             <q-card-section class="relative">
                                 <ActionMenu :item="{ ...reply, type: 'reply', parentCommentId: comment.commentId }"
-                                    @edit="handleReplyEdit" @remove="handleDelete" @report="handleReplyReport" />
+                                    @edit="handleContentEdit" @remove="handleDelete" @report="handleReplyReport" />
                                 <div class="text-bold">User ID: {{ reply.userId }} - Reply ID: {{ reply.commentId }}
                                 </div>
                                 <div class="text-body2">{{ reply.content }}</div>
@@ -265,6 +334,8 @@ const handleDelete = async (item) => {
                 </div>
             </q-card>
         </div>
+        <EditPostDialog v-model="isEditDialogOpen" :item="editData" :type="editData?.type || 'post'"
+            @save="updateContent" />
     </div>
 </template>
 
