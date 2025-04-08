@@ -46,6 +46,7 @@
     <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
       <q-tabs vertical>
         <q-route-tab to="/auth/login" icon="account_circle" label="account" />
+        <q-route-tab v-show="isAdmin" to="/admin/admin-page" icon="admin_panel_settings" label="admin-page" />
       </q-tabs>
     </q-drawer>
 
@@ -56,17 +57,30 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref } from 'vue';
+import { jwtDecode } from "jwt-decode";
 
 export default {
   setup() {
     const rightDrawerOpen = ref(false)
 
+    const isAdmin = ref(false)
+
+    // Check if the user is an admin
+    const token = JSON.parse(localStorage.getItem('authUser'))
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      console.log(decodedToken);
+
+      isAdmin.value = decodedToken.authorities[0] === 'ADMIN'
+    }
+
     return {
       rightDrawerOpen,
       toggleRightDrawer() {
         rightDrawerOpen.value = !rightDrawerOpen.value
-      }
+      },
+      isAdmin
     }
   }
 }

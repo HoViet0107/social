@@ -26,6 +26,11 @@ const routes = [
     component: () => import('src/layouts/MainLayout.vue'),
     children: [{ path: '', component: () => import('src/pages/ChatsPage.vue') }],
   },
+  {
+    path: '/admin/admin-page',
+    component: () => import('src/layouts/MainLayout.vue'),
+    children: [{ path: '', component: () => import('src/pages/Admin/AdminPage.vue') }],
+  },
 
 
   //
