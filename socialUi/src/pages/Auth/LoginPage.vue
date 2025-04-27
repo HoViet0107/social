@@ -44,7 +44,6 @@ export default {
                 const response = await UserServices.login(user.value); // Call login API
                 if (response.data) {
                     localStorage.setItem("authUser", JSON.stringify(response.data.token)); // Save token to localStorage
-                    console.log(response.data.message);
 
                     window.location.href = '/'; // navigate to home page when login success
                 }

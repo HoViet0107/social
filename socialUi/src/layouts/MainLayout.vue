@@ -56,32 +56,27 @@
   </q-layout>
 </template>
 
-<script>
-import { ref } from 'vue';
+<script setup>
+import { ref, onMounted } from 'vue';
 import { jwtDecode } from "jwt-decode";
 
-export default {
-  setup() {
-    const rightDrawerOpen = ref(false)
+const rightDrawerOpen = ref(false);
+const isAdmin = ref(false);
 
-    const isAdmin = ref(false)
-
-    // Check if the user is an admin
-    const token = JSON.parse(localStorage.getItem('authUser'))
-    if (token) {
-      const decodedToken = jwtDecode(token);
-      console.log(decodedToken);
-
-      isAdmin.value = decodedToken.authorities[0] === 'ADMIN'
-    }
-
-    return {
-      rightDrawerOpen,
-      toggleRightDrawer() {
-        rightDrawerOpen.value = !rightDrawerOpen.value
-      },
-      isAdmin
+onMounted(() => {
+  // Check if the user is an admin
+  const token = localStorage.getItem('authUser');
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(JSON.parse(token));
+      isAdmin.value = decodedToken.authorities[0] === 'ADMIN';
+    } catch (error) {
+      // Handle token parsing error silently
     }
   }
-}
+});
+
+const toggleRightDrawer = () => {
+  rightDrawerOpen.value = !rightDrawerOpen.value;
+};
 </script>

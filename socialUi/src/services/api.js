@@ -9,6 +9,10 @@ export const api = axios.create({
     },
 });
 
+const authConfig = (token) => ({
+    headers: { Authorization: `Bearer ${token}` }
+});
+
 export const UserServices = {
     login(data) {
         return api.post(`/auth/login`, data);
@@ -29,25 +33,13 @@ export const PostServices = {
         return api.get(`/posts/${postId}`);
     },
     createPost(data, token) {
-        return api.post(`/posts`, data, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
+        return api.post(`/posts`, data, authConfig(token));
     },
     updatePost(data, token) {
-        return api.put(`/posts`, data, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
+        return api.put(`/posts`, data, authConfig(token));
     },
     deletePost(postId, token) {
-        return api.put(`/posts/${postId}/status`, {}, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
+        return api.put(`/posts/${postId}/status`, {}, authConfig(token));
     }
 };
 

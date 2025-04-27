@@ -1,38 +1,22 @@
 const routes = [
   // auth router
   {
-    path: '/auth/login',
-    component: () => import('src/layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('src/pages/Auth/LoginPage.vue') }],
-  },
-  {
-    path: '/auth/register',
-    component: () => import('src/layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('src/pages/Auth/RegisterPage.vue') }],
-  },
-  // 
-  {
     path: '/',
     component: () => import('src/layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('src/pages/IndexPage.vue') }],
+    children: [
+      { path: '', component: () => import('src/pages/IndexPage.vue') },
+      { path: ':group', component: () => import('src/pages/GroupPage.vue') },
+      { path: 'chat', component: () => import('src/pages/ChatsPage.vue') },
+      { path: 'admin/admin-page', component: () => import('src/pages/Admin/AdminPage.vue') },
+      { 
+        path: 'auth', 
+        children: [
+          { path: 'login', component: () => import('src/pages/Auth/LoginPage.vue') },
+          { path: 'register', component: () => import('src/pages/Auth/RegisterPage.vue') }
+        ]
+      }
+    ]
   },
-  {
-    path: '/group',
-    component: () => import('src/layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('src/pages/GroupPage.vue') }],
-  },
-  {
-    path: '/chat',
-    component: () => import('src/layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('src/pages/ChatsPage.vue') }],
-  },
-  {
-    path: '/admin/admin-page',
-    component: () => import('src/layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('src/pages/Admin/AdminPage.vue') }],
-  },
-
-
   //
   {
     path: '/:catchAll(.*)*',

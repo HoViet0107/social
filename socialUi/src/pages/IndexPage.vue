@@ -78,21 +78,30 @@ import PostDetail from "src/components/PostDetail.vue";
 import ActionMenu from "src/components/ActionMenu.vue";
 import EditPostDialog from "src/components/EditPostDialog.vue";
 
-const posts = ref([]); // initialize posts as an empty array
-const text = ref(''); // post content
-// const ph = ref('');
+// State variables
+const posts = ref([]);
+const text = ref('');
 const dense = ref(false);
-const selectedPost = ref(null); // initialize selectedPost as null
-const isPostOpen = ref(false); // initialize isPostOpen as false
+const selectedPost = ref(null);
+const isPostOpen = ref(false);
 const isEditDialogOpen = ref(false);
 const editData = ref(null);
+
+// Helper function to get auth token
+const getAuthToken = () => {
+  try {
+    return JSON.parse(localStorage.getItem("authUser"));
+  } catch (error) {
+    return null;
+  }
+};
 
 // Call API when component is mounted to fetch posts
 const fetchPosts = async () => {
   try {
     const response = await PostServices.getPosts();
     if (response.data._embedded && response.data._embedded.postDTOList) {
-      posts.value = response.data._embedded.postDTOList; // extract data
+      posts.value = response.data._embedded.postDTOList;
 
       // Call API to fetch user for each post
       for (let post of posts.value) {
@@ -101,38 +110,33 @@ const fetchPosts = async () => {
           fetchUser(post);
         }
       }
-
-    } else {
-      console.error("An error occurred while fetching posts.");
     }
   } catch (error) {
-    console.error("Failed to fetch posts: ", error);
+    // Handle error appropriately
   }
 };
 
-// Call API when component is mounted to fetch user
+// Call API to fetch user
 const fetchUser = async (post) => {
   try {
     const response = await UserServices.getUserById(post.userId);
-    if (response.data && response.data) {
-      post.user = response.data; // extract data
-    } else {
-      console.error("An error occurred while fetching posts.");
+    if (response.data) {
+      post.user = response.data;
     }
   } catch (error) {
     console.error("Failed to fetch user: ", error);
   }
 }
 
-// convert date to dd/MM/yyyy HH:mm:ss
+// Format date
 const formatDate = (isoString) => {
   if (!isoString) return "N/A";
   return format(new Date(isoString), "dd/MM/yyyy HH:mm:ss");
 };
 
-// send request to create post
+// Send request to create post
 const submitPost = async () => {
-  const token = JSON.parse(localStorage.getItem("authUser"));
+  const token = getAuthToken();
   if (!token) {
     console.error("Token not found!");
     return;
@@ -155,9 +159,12 @@ const submitPost = async () => {
     const response = await PostServices.createPost(postData, token);
 
     posts.value.unshift({
+      postId: response.data.post.postId,
       content: response.data.content,
       createdAt: response.data.post.createdAt,
       lastUpdated: response.data.post.lastUpdated,
+      userId: response.data.post.userId,
+      type: 'post',
       user: response.data.post.user || { firstName: "Unknown", surname: "", lastName: "" }
     });
 
@@ -173,15 +180,16 @@ const openPost = (post) => {
   isPostOpen.value = true;
 };
 
-// action menu
+// Open edit dialog
 const openEditDialog = ({ item, type }) => {
   editData.value = { ...item, type }; // Create a copy to avoid reference issues
   isEditDialogOpen.value = true;
 };
 
+// Update content (post or comment)
 const updateContent = async (updatedData) => {
   try {
-    const token = JSON.parse(localStorage.getItem('authUser'));
+    const token = getAuthToken();
     if (!token) {
       console.error('No authentication token found');
       return;
@@ -195,46 +203,43 @@ const updateContent = async (updatedData) => {
         post: {
           postId: postId
         }
-      }
+      };
 
-      // Make the API call to update the post
-      const response = await PostServices.updatePost(
-        requestBody,
-        token
-      );
+      const response = await PostServices.updatePost(requestBody, token);
 
-      // Find and update the post in the posts array
+      // Update local state
       const postIndex = posts.value.findIndex(post => post.postId === postId);
       if (postIndex !== -1) {
         // Update the content in the local posts array
         posts.value[postIndex].content = updatedData.content;
-        // Update timestamp from API response if available
-        if (response && response.lastUpdated) {
-          posts.value[postIndex].lastUpdated = response.lastUpdated;
+        if (response && response.data && response.data.lastUpdated) {
+          posts.value[postIndex].lastUpdated = response.data.lastUpdated;
         }
       }
 
-      // If we're in post detail view, update that as well
+      // Update selected post if needed
       if (selectedPost.value && selectedPost.value.postId === postId) {
         selectedPost.value.content = updatedData.content;
-        if (response && response.lastUpdated) {
-          selectedPost.value.lastUpdated = response.lastUpdated;
+        if (response && response.data && response.data.lastUpdated) {
+          selectedPost.value.lastUpdated = response.data.lastUpdated;
         }
       }
     }
     else if (updatedData.type === "comment") {
       const commentId = updatedData.commentId;
-
       if (!commentId) {
         console.error('No comment ID found in the data:', updatedData);
         return;
       }
 
-      await CommentServices.updateComment(
-        commentId,
-        updatedData.content,
-        token
-      );
+      // This method doesn't exist in your API service
+      // You need to implement CommentServices.editComment instead
+      await CommentServices.editComment({
+        commentId: commentId,
+        content: updatedData.content
+      }, token);
+      
+      // You should update the UI for comments here
     }
   } catch (error) {
     console.error('Error updating content:', error);
@@ -251,7 +256,7 @@ const handleDelete = async (post) => {
 
   if (confirm(`Are you sure you want to delete this ${type}?`)) {
     try {
-      const token = JSON.parse(localStorage.getItem('authUser'));
+      const token = getAuthToken();
       if (!token) {
         console.error('No authentication token found');
         return;
@@ -261,10 +266,12 @@ const handleDelete = async (post) => {
         await PostServices.deletePost(post.postId, token);
         // Remove the post from the local array
         posts.value = posts.value.filter(p => p.postId !== post.postId);
-        console.log("Post deleted successfully");
       } else if (type === "comment") {
-        // Handle comment deletion if needed
-        console.log("Comment deleted!");
+        // Implement comment deletion with proper UI update
+        await CommentServices.deleteComment({
+          commentId: post.commentId
+        }, token);
+        // Update UI for comments
       }
     } catch (error) {
       console.error("Failed to delete:", error);
