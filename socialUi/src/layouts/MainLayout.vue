@@ -36,6 +36,7 @@
                 d="M4 4h16v12H5.17L4 17.17V4m0-2c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H4zm2 10h8v2H6v-2zm0-3h12v2H6V9zm0-3h12v2H6V6z" />
             </svg>
           </q-route-tab>
+
         </q-tabs>
         <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
       </q-toolbar>
@@ -45,8 +46,9 @@
     <!-- right drawer -->
     <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
       <q-tabs vertical>
-        <q-route-tab to="/auth/login" icon="account_circle" label="account" />
+        <q-route-tab to="/user/profile" icon="account_circle" label="account" />
         <q-route-tab v-show="isAdmin" to="/admin/admin-page" icon="admin_panel_settings" label="admin-page" />
+        <q-route-tab to="/auth/login" icon="login" label="Login" />
       </q-tabs>
     </q-drawer>
 
@@ -69,9 +71,11 @@ onMounted(() => {
   if (token) {
     try {
       const decodedToken = jwtDecode(JSON.parse(token));
+      
       isAdmin.value = decodedToken.authorities[0] === 'ADMIN';
     } catch (error) {
       // Handle token parsing error silently
+      console.error('Failed to parse token:', error);
     }
   }
 });

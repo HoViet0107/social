@@ -60,6 +60,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getUserByEmail(User user) {
+        return userRepo.findByEmail(user.getEmail());
+    }
+
+    @Override
     public User register(User user) {
         if(userRepo.findByEmail(user.getEmail()) != null) {
             throw new RuntimeException("Email already existed!");
@@ -82,6 +87,40 @@ public class UserServiceImpl implements UserService {
         roleRepos.save(role);
         // save user
         return userRepo.save(user);
+    }
+
+    @Override
+    public User editUser(User existedUser, User user) {
+        // Check if password is being updated
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            // Validate the new password
+            if (!validatePassword(user)) {
+                throw new RuntimeException("Invalid password!");
+            }
+            // Encrypt the new password
+            existedUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
+        // Check if phone is being changed and validate it
+        if (user.getPhone() != null && !user.getPhone().equals(existedUser.getPhone())) {
+            existedUser.setPhone(user.getPhone());
+        }
+
+        // Update other user information
+        if (user.getFirstName() != null && !user.getFirstName().equals(existedUser.getFirstName())) {
+            existedUser.setFirstName(user.getFirstName());
+        }
+        if (user.getSurname() != null  && !user.getSurname().equals(existedUser.getSurname())) {
+            existedUser.setSurname(user.getSurname());
+        }
+        if (user.getLastName() != null && !user.getLastName().equals(existedUser.getLastName())) {
+            existedUser.setLastName(user.getLastName());
+        }
+        if (user.getDob() != null && !user.getDob().equals(existedUser.getDob())) {
+            existedUser.setDob(user.getDob());
+        }
+
+        return userRepo.save(existedUser);
     }
 
     private boolean validatePassword(User user) {

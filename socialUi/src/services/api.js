@@ -22,7 +22,13 @@ export const UserServices = {
     },
     getUserById(userId) {
         return api.get(`/user/${userId}`);
-    }
+    },
+    getUserByEmail(token) {
+        return api.get(`/user/user-details`, authConfig(token));
+    },
+    editUser(data, token) {
+        return api.put(`/user/${data.userId}`, data, authConfig(token));
+    },
 };
 
 export const PostServices = {

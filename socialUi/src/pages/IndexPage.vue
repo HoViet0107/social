@@ -92,6 +92,7 @@ const getAuthToken = () => {
   try {
     return JSON.parse(localStorage.getItem("authUser"));
   } catch (error) {
+    console.error("Error parsing authUser:", error);
     return null;
   }
 };
@@ -112,6 +113,7 @@ const fetchPosts = async () => {
       }
     }
   } catch (error) {
+    console.error("Failed to fetch posts: ", error);
     // Handle error appropriately
   }
 };
