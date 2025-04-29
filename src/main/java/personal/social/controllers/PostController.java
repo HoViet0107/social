@@ -23,18 +23,18 @@ public class PostController {
 
     private final PostService postService;
     private final JwtUtil jwtUtil;
-    private final UserRepository userRepo;
+    private final UserRepository userRepos;
     private final PagedResourcesAssembler<PostDTO> pagedResourcesAssembler;
 
     @Autowired
     public PostController(
             PostService postService,
             JwtUtil jwtUtil,
-            UserRepository userRepo,
+            UserRepository userRepos,
             PagedResourcesAssembler<PostDTO> pagedResourcesAssembler) {
         this.postService = postService;
         this.jwtUtil = jwtUtil;
-        this.userRepo = userRepo;
+        this.userRepos = userRepos;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
     }
 
@@ -58,18 +58,8 @@ public class PostController {
     public ResponseEntity<?> createPost(
             @RequestBody PostContent postContent,
             HttpServletRequest request) {
-        // extract token
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // get token without "Bearer "
-        } else {
-            throw new RuntimeException("Missing or invalid Authorization header");
-        }
-        if(jwtUtil.isTokenExpired(token)){
-            return ResponseEntity.badRequest().body("Token expired!");
-        }
         // extract email and get existed user by email
-        User existedUser = userRepo.findByEmail(jwtUtil.extractEmail(token));
+        User existedUser = extractToken(request);
 
         // pass post content and user to createPost()
         try{
@@ -86,18 +76,8 @@ public class PostController {
     public ResponseEntity<?> updatePost(
         @RequestBody PostContent postContent,
         HttpServletRequest request){
-        // extract token
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // get token without "Bearer "
-        } else {
-            throw new RuntimeException("Missing or invalid Authorization header");
-        }
-        if(jwtUtil.isTokenExpired(token)){
-            return ResponseEntity.badRequest().body("Token expired!");
-        } // end extract token
-        // get user by email
-        User user = userRepo.findByEmail(jwtUtil.extractEmail(token));
+        // extract existed user from token
+        User user = extractToken(request);
         try{
             // update post new content
             return ResponseEntity.ok(postService.updatePost(postContent, user));
@@ -111,6 +91,17 @@ public class PostController {
     public ResponseEntity<?> updatePostStatus(
             @PathVariable Long postId,
             HttpServletRequest request){
+        // extract existed user from token
+        User user = extractToken(request);
+        try{
+            postService.updatePostStatus(postId, user);
+            return ResponseEntity.ok().body("Status changed!");
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    User extractToken(HttpServletRequest request){
         // extract token
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
@@ -119,15 +110,14 @@ public class PostController {
             throw new RuntimeException("Missing or invalid Authorization header");
         }
         if(jwtUtil.isTokenExpired(token)){
-            return ResponseEntity.badRequest().body("Token expired!");
+            throw new RuntimeException("Token expired");
         } // end extract token
-        // get user by email
-        User user = userRepo.findByEmail(jwtUtil.extractEmail(token));
-        try{
-            postService.updatePostStatus(postId, user);
-            return ResponseEntity.ok().body("Status changed!");
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+
+        User existedUser = userRepos.findByEmail(jwtUtil.extractEmail(token));
+        if(existedUser == null){
+            throw new RuntimeException("User not existed!");
         }
+
+        return existedUser;
     }
 }

@@ -1,10 +1,13 @@
 package personal.social.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import personal.social.config.JwtUtil;
+import personal.social.helper.CommonHelpers;
 import personal.social.model.User;
 import personal.social.repository.UserRepository;
 import personal.social.services.UserService;
@@ -17,12 +20,14 @@ public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepos;
+    private final CommonHelpers commonHelpers;
 
     @Autowired
-    public UserController(UserService userService, JwtUtil jwtUtil, UserRepository userRepos){
+    public UserController(UserService userService, JwtUtil jwtUtil, UserRepository userRepos, CommonHelpers commonHelpers){
         this.userService = userService;
         this.jwtUtil = jwtUtil;
         this.userRepos = userRepos;
+        this.commonHelpers = commonHelpers;
     }
 
     @GetMapping("/{userId}")
@@ -34,23 +39,25 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "get user profile", security = @SecurityRequirement(name = "bearerAuth"))
     @GetMapping("user-details")
     public ResponseEntity<?> getUserDetails(HttpServletRequest request){
         try{
-            User existedUser = extractToken(request);
+            User existedUser = commonHelpers.extractToken(request);
             return ResponseEntity.ok(userService.getUserByEmail(existedUser));
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body(e);
         }
     }
 
+    @Operation(summary = "edit user profile", security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping("/{userId}")
     public ResponseEntity<?> editUser(
             @PathVariable Long userId,
             @RequestBody User user,
             HttpServletRequest request
     ){
-        User existedUser = extractToken(request);
+        User existedUser = commonHelpers.extractToken(request);
         if(existedUser == null){
             throw new RuntimeException("User not existed!");
         }
@@ -64,25 +71,5 @@ public class UserController {
         }catch (Exception e){
             return ResponseEntity.internalServerError().body(e.getMessage());
         }
-    }
-
-    User extractToken(HttpServletRequest request){
-        // extract token
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // get token without "Bearer "
-        } else {
-            throw new RuntimeException("Missing or invalid Authorization header");
-        }
-        if(jwtUtil.isTokenExpired(token)){
-            throw new RuntimeException("Token expired");
-        } // end extract token
-
-        User existedUser = userRepos.findByEmail(jwtUtil.extractEmail(token));
-        if(existedUser == null){
-            throw new RuntimeException("User not existed!");
-        }
-
-        return existedUser;
     }
 }

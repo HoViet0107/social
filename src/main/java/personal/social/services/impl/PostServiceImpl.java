@@ -14,6 +14,7 @@ import personal.social.repository.PostRepository;
 import personal.social.services.PostService;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -66,16 +67,34 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostContent updatePost(PostContent postContent, User user) {
         LocalDateTime currentDateTime = LocalDateTime.now();
+
         // get existed post by post id
         Post existedPost = postRepos.findByPostId(postContent.getPost().getPostId());
+        if(existedPost == null){
+            throw new RuntimeException("Post not found!");
+        }
+
         // set new update time
-        existedPost.setLastUpdated(currentDateTime);
-        postRepos.save(existedPost);
+        if(!Objects.equals(existedPost.getLastUpdated(), currentDateTime)) {
+            existedPost.setLastUpdated(currentDateTime);
+
+            try{ // save changed existedPost
+                postRepos.save(existedPost);
+            } catch (RuntimeException e){
+                throw new RuntimeException("Failed to change post update time!");
+            }
+        }
+
         // save new post content for existedPost and return it
         PostContent newContent = new PostContent();
-        newContent.setContent(postContent.getContent());
-        newContent.setUpdatedAt(currentDateTime);
-        newContent.setPost(existedPost);
+        try {
+            newContent.setContent(postContent.getContent());
+            newContent.setUpdatedAt(currentDateTime);
+            newContent.setPost(existedPost);
+        } catch (RuntimeException e){
+            throw new RuntimeException("Failed to save changed post-content!");
+        }
+
         return pcRepos.save(newContent);
     }
 
