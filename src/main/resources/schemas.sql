@@ -1,5 +1,6 @@
 use social_media;
 DELIMITER //
+DROP PROCEDURE IF EXISTS GetTopLevelComments //
 CREATE PROCEDURE GetTopLevelComments(
     IN postIdParam BIGINT, -- ✅ Sửa từ LONG thành BIGINT
     IN pageNumber INT,
@@ -30,7 +31,6 @@ BEGIN
     LIMIT pageSize OFFSET offsetValue;
 END//
 DELIMITER ;
-CALL GetTopLevelComments(8,1,10); 
 
 -- getCommentReplies
 DELIMITER //
@@ -66,24 +66,4 @@ BEGIN
 END//
 DELIMITER ;
 
-Call GetCommentReplies(8,1,10,14);
-
-SELECT 
-		c.comment_id AS commentId,
-		c.created_at AS createdAt,
-		c.last_updated AS lastUpdated,
-		c.comment_status AS commentStatus,
-		c.likes AS likes,
-		c.dislikes AS dislikes,
-		cc.content,
-		c.user_id AS userId,
-		c.post_id AS postId,
-		c.parent_comment_id AS parentCommentId
-    FROM comments c
-    JOIN comment_content cc ON c.comment_id = cc.comment_id
-	WHERE c.comment_status = 'ACTIVE'
-       AND c.last_updated = cc.last_updated
-       AND c.parent_comment_id = 14
-    ORDER BY c.created_at DESC;
-
-update comments set parent_comment_id = 0 where post_id=8;
+-- (like-unlike, dislike-undislike, share, report) procedure

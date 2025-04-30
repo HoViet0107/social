@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import personal.social.config.JwtUtil;
 import personal.social.dto.PostDTO;
+import personal.social.dto.ReactionRequest;
+import personal.social.helper.CommonHelpers;
 import personal.social.model.PostContent;
 import personal.social.model.User;
 import personal.social.repository.UserRepository;
@@ -25,17 +27,20 @@ public class PostController {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepos;
     private final PagedResourcesAssembler<PostDTO> pagedResourcesAssembler;
+    private final CommonHelpers commonHelpers;
 
     @Autowired
     public PostController(
             PostService postService,
             JwtUtil jwtUtil,
             UserRepository userRepos,
-            PagedResourcesAssembler<PostDTO> pagedResourcesAssembler) {
+            PagedResourcesAssembler<PostDTO> pagedResourcesAssembler,
+            CommonHelpers commonHelpers) {
         this.postService = postService;
         this.jwtUtil = jwtUtil;
         this.userRepos = userRepos;
         this.pagedResourcesAssembler = pagedResourcesAssembler;
+        this.commonHelpers = commonHelpers;
     }
 
     @GetMapping
@@ -59,7 +64,7 @@ public class PostController {
             @RequestBody PostContent postContent,
             HttpServletRequest request) {
         // extract email and get existed user by email
-        User existedUser = extractToken(request);
+        User existedUser = commonHelpers.extractToken(request);
 
         // pass post content and user to createPost()
         try{
@@ -77,7 +82,7 @@ public class PostController {
         @RequestBody PostContent postContent,
         HttpServletRequest request){
         // extract existed user from token
-        User user = extractToken(request);
+        User user = commonHelpers.extractToken(request);
         try{
             // update post new content
             return ResponseEntity.ok(postService.updatePost(postContent, user));
@@ -92,32 +97,12 @@ public class PostController {
             @PathVariable Long postId,
             HttpServletRequest request){
         // extract existed user from token
-        User user = extractToken(request);
+        User user = commonHelpers.extractToken(request);
         try{
             postService.updatePostStatus(postId, user);
             return ResponseEntity.ok().body("Status changed!");
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-    }
-
-    User extractToken(HttpServletRequest request){
-        // extract token
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // get token without "Bearer "
-        } else {
-            throw new RuntimeException("Missing or invalid Authorization header");
-        }
-        if(jwtUtil.isTokenExpired(token)){
-            throw new RuntimeException("Token expired");
-        } // end extract token
-
-        User existedUser = userRepos.findByEmail(jwtUtil.extractEmail(token));
-        if(existedUser == null){
-            throw new RuntimeException("User not existed!");
-        }
-
-        return existedUser;
     }
 }
