@@ -5,12 +5,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import personal.social.dto.PostDTO;
+import personal.social.dto.ReactionRequest;
+import personal.social.enums.ObjectType;
+import personal.social.enums.ReactionType;
 import personal.social.enums.Status;
-import personal.social.model.Post;
-import personal.social.model.PostContent;
-import personal.social.model.User;
+import personal.social.model.*;
 import personal.social.repository.PostContentRepository;
 import personal.social.repository.PostRepository;
+import personal.social.repository.ReactionSummaryRepository;
 import personal.social.services.PostService;
 
 import java.time.LocalDateTime;
@@ -21,12 +23,16 @@ import java.util.Optional;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepos;
     private final PostContentRepository pcRepos;
+    private final ReactionSummaryRepository reactSumRepos;
+
     @Autowired
     public PostServiceImpl(
             PostRepository postRepos,
-            PostContentRepository pcRepos) {
+            PostContentRepository pcRepos,
+            ReactionSummaryRepository reactSumRepos) {
         this.postRepos = postRepos;
         this.pcRepos = pcRepos;
+        this.reactSumRepos = reactSumRepos;
     }
 
 
@@ -35,20 +41,38 @@ public class PostServiceImpl implements PostService {
         LocalDateTime currentDateTime = LocalDateTime.now();
         // create post
         Post post = new Post();
-        try{
+        try {
             post.setCreatedAt(currentDateTime);
             post.setLastUpdated(currentDateTime);
             post.setStatus(Status.ACTIVE);
             post.setUser(user);
-            postRepos.save(post) ;
-        } catch (Exception e){
+            postRepos.save(post);
+        } catch (Exception e) {
             throw new RuntimeException("Create Post failed!");
         }
-        // save post content
+
+        // Initialize post reaction
         try{
+            if (post.getPostId() != null){
+                ReactionSummary newReactionSum = new ReactionSummary(
+                        ObjectType.POST,
+                        post.getPostId(),
+                        0L,
+                        0L,
+                        0L,
+                        0L);
+                reactSumRepos.save(newReactionSum);
+            }
+        }
+        catch(Exception e){
+            throw new RuntimeException("Failed to create post reaction summary!");
+        }
+
+        // save post content
+        try {
             postContent.setPost(post);
             postContent.setUpdatedAt(currentDateTime);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Save Post content failed!");
         }
         return pcRepos.save(postContent);
@@ -70,17 +94,17 @@ public class PostServiceImpl implements PostService {
 
         // get existed post by post id
         Post existedPost = postRepos.findByPostId(postContent.getPost().getPostId());
-        if(existedPost == null){
+        if (existedPost == null) {
             throw new RuntimeException("Post not found!");
         }
 
         // set new update time
-        if(!Objects.equals(existedPost.getLastUpdated(), currentDateTime)) {
+        if (!Objects.equals(existedPost.getLastUpdated(), currentDateTime)) {
             existedPost.setLastUpdated(currentDateTime);
 
-            try{ // save changed existedPost
+            try { // save changed existedPost
                 postRepos.save(existedPost);
-            } catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 throw new RuntimeException("Failed to change post update time!");
             }
         }
@@ -91,7 +115,7 @@ public class PostServiceImpl implements PostService {
             newContent.setContent(postContent.getContent());
             newContent.setUpdatedAt(currentDateTime);
             newContent.setPost(existedPost);
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             throw new RuntimeException("Failed to save changed post-content!");
         }
 
@@ -101,15 +125,15 @@ public class PostServiceImpl implements PostService {
     @Override
     public void updatePostStatus(Long postId, User user) {
         Post deletedPost = postRepos.findByPostId(postId);
-        if(deletedPost.getUser().equals(user)){
-            if(deletedPost.getStatus().equals(Status.ACTIVE)){
+        if (deletedPost.getUser().equals(user)) {
+            if (deletedPost.getStatus().equals(Status.ACTIVE)) {
                 deletedPost.setStatus(Status.INACTIVE);
                 postRepos.save(deletedPost);
             } else {
                 deletedPost.setStatus(Status.ACTIVE);
                 postRepos.save(deletedPost);
             }
-        } else{
+        } else {
             throw new RuntimeException("Permission denied!");
         }
     }

@@ -3,9 +3,8 @@ package personal.social.services;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import personal.social.dto.PostDTO;
-import personal.social.model.Post;
-import personal.social.model.PostContent;
-import personal.social.model.User;
+import personal.social.dto.ReactionRequest;
+import personal.social.model.*;
 
 import java.util.Optional;
 
@@ -19,6 +18,4 @@ public interface PostService {
     PostContent updatePost(PostContent postContent, User user);
 
     void updatePostStatus(Long postId, User user);
-
-
 }
