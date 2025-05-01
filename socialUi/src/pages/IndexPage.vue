@@ -51,7 +51,11 @@
         <!-- post like, comment -->
         <q-separator class="q-my-sm" />
         <div class="row full-width justify-between items-center q-gutter-md">
-          <q-btn flat round dense icon="favorite_border" size="md" />
+          <q-btn flat round dense 
+            :icon="post.likeIcon || 'favorite_border'" 
+            :color="post.liked ? 'red' : ''" 
+            size="md"
+            @click="handlePostReaction(post)" />
           <q-btn flat round dense icon="mode_comment" size="md" @click="openPost(post)" />
           <q-btn flat round dense icon=" share" size="md" />
         </div>
@@ -74,6 +78,7 @@
 import { ref, onMounted } from "vue";
 import { format } from "date-fns";
 import { CommentServices, PostServices, UserServices } from "src/services/api";
+import { userPostCommentReaction } from "src/helpers/helperFunctions";
 import PostDetail from "src/components/PostDetail.vue";
 import ActionMenu from "src/components/ActionMenu.vue";
 import EditPostDialog from "src/components/EditPostDialog.vue";
@@ -240,7 +245,7 @@ const updateContent = async (updatedData) => {
         commentId: commentId,
         content: updatedData.content
       }, token);
-      
+
       // You should update the UI for comments here
     }
   } catch (error) {
@@ -286,6 +291,28 @@ const handleDelete = async (post) => {
 const handleReport = ({ item, type }) => {
   console.log(`${type === "post" ? "Post" : "Comment"} Reported:`, item);
 };
+
+// handle like/unlike post
+const handlePostReaction = async (post) => {
+  const response = await userPostCommentReaction("POST", post.postId, "LIKE")
+  // Toggle the liked status visually
+  console.log(response.data);
+  
+  if (response.status === 200) {
+    // Toggle the liked status visually
+    post.liked = !post.liked;
+
+    // Update like count if available in the response
+    if (response.data) {
+      post.likeCount = response.data.likes || 0;
+    }
+
+    // Update icon based on liked status
+    post.likeIcon = post.liked ? 'favorite' : 'favorite_border';
+    console.log("Post liked:", post);
+    
+  }
+}
 
 // Call API when component is loaded
 onMounted(fetchPosts);
