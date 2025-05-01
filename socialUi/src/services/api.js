@@ -73,4 +73,8 @@ export const CommentServices = {
     },
 };
 
-
+export const UserReactionServices = {
+    userReaction(data, token) {
+        return api.put(`/user-reaction`, data, authConfig(token));
+    },
+}
