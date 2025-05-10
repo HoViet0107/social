@@ -6,20 +6,18 @@ import personal.social.enums.ObjectType;
 import personal.social.enums.ReactionType;
 import personal.social.model.UserReaction;
 
+/**
+ * Repository interface for managing user reactions (likes, dislikes, etc.)
+ * Provides methods to find reactions by feed item and reaction type
+ */
 public interface UserReactionRepository extends JpaRepository<UserReaction, Long> {
-//    @Query(value = "SELECT new UserReaction(ur.id, ur.user, ur.reactionType, ur.objectType, ur.objectId, ur.reactedAt) " +
-//            "FROM UserReaction ur " +
-//            "WHERE ur.objectType =:objectType " +
-//            "AND ur.objectId=:objectId " +
-//            "AND ur.reactionType=:reactionType " +
-//            "AND ur.user.userId=:userId ")
-//    UserReaction findUserReaction(
-//            ObjectType objectType,
-//            Long objectId,
-//            ReactionType reactionType,
-//            Long userId
-//    );
-
+    /**
+     * Finds a user reaction by feed item ID and reaction type
+     * 
+     * @param feedItemId The ID of the feed item
+     * @param reactionType The type of reaction (LIKE, DISLIKE, etc.)
+     * @return The user reaction if found
+     */
     @Query(value = "SELECT ur FROM UserReaction ur " +
             "WHERE ur.feedItem.feedItemId =:feedItemId " +
             "AND ur.reactionType =:reactionType")

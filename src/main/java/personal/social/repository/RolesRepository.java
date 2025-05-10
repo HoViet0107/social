@@ -9,10 +9,18 @@ import personal.social.model.Users;
 
 import java.util.List;
 
+/**
+ * Repository interface for managing user roles
+ * Provides methods to find roles by role enum
+ */
 @Repository
-public interface RoleRepository extends JpaRepository<Roles, Long> {
-    List<Roles> findByUser(Users user);
-
+public interface RolesRepository extends JpaRepository<Roles, Long> {
+    /**
+     * Finds a role by role enum
+     * 
+     * @param roleEnum The role enum (ADMIN, USER, etc.)
+     * @return The role if found
+     */
     @Query(value = "SELECT r FROM Roles r WHERE r.role =:roleEnum")
     Roles findByRole(RoleEnum roleEnum);
 }

@@ -10,8 +10,19 @@ import personal.social.enums.ReactionType;
 import personal.social.model.ReactionSummary;
 import personal.social.model.UserReaction;
 
+/**
+ * Repository interface for managing reaction summaries
+ * Provides methods to toggle reactions and find summaries by feed item
+ */
 public interface ReactionSummaryRepository extends JpaRepository<ReactionSummary, Long> {
-    // find post/comment reaction summary
+    /**
+     * Toggles a reaction (like/unlike, dislike/undislike) for a feed item
+     *
+     * @param userId       The user ID
+     * @param objectType   The object type (POST, COMMENT)
+     * @param objectId     The object ID
+     * @param reactionType The reaction type (LIKE, DISLIKE, etc.)
+     */
     @Modifying
     @Transactional
     @Query(value = "CALL ToggleReaction(:p_user_id, :p_object_type, :p_object_id, :p_reaction_type)", nativeQuery = true)
@@ -24,6 +35,12 @@ public interface ReactionSummaryRepository extends JpaRepository<ReactionSummary
 
 //    ReactionSummary findByObjectTypeAndObjectId(ObjectType objectType, Long objectId);
 
+    /**
+     * Finds a reaction summary by feed item ID
+     *
+     * @param feedItemId The feed item ID
+     * @return The reaction summary if found
+     */
     @Query(value = "SELECT rs FROM ReactionSummary rs WHERE rs.feedItem.feedItemId =:feedItemId")
     ReactionSummary findByFeedItemId(Long feedItemId);
 }
