@@ -1,30 +1,29 @@
 package personal.social.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * Represents the data transfer object for a user, containing essential user information.
+ * This DTO is used for transmitting user-related information, such as email and password, in API requests.
+ *
+ * @Data Automatically generates getters, setters, equals, hashCode, and toString methods.
+ * @AllArgsConstructor Generates a constructor with all fields.
+ * @NoArgsConstructor Generates a default constructor (no arguments).
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDTO {
+    /**
+     * The email address of the user.
+     */
     private String email;
+
+    /**
+     * The password of the user.
+     */
     private String password;
-
-    public UserDTO(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
-
-    public UserDTO() {
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }
+

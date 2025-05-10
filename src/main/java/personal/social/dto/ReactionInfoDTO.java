@@ -1,93 +1,58 @@
 package personal.social.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * Represents the information about reactions for a particular feed item.
+ * This DTO stores counts and status flags for different types of reactions (likes, dislikes, shares, reports) for a feed item.
+ *
+ * @Data Automatically generates getters, setters, equals, hashCode, and toString methods.
+ * @AllArgsConstructor Generates a constructor with all fields.
+ * @NoArgsConstructor Generates a default constructor (no arguments).
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ReactionInfoDTO {
+    /**
+     * The total number of "likes" reactions on the feed item.
+     */
     private long likes;
+
+    /**
+     * Flag indicating whether the current user has "liked" the feed item.
+     */
     private boolean isLike;
 
+    /**
+     * The total number of "dislikes" reactions on the feed item.
+     */
     private long dislikes;
+
+    /**
+     * Flag indicating whether the current user has "disliked" the feed item.
+     */
     private boolean isDislike;
 
+    /**
+     * The total number of "shares" reactions on the feed item.
+     */
     private long shares;
+
+    /**
+     * Flag indicating whether the current user has "shared" the feed item.
+     */
     private boolean isShare;
 
+    /**
+     * The total number of "reports" reactions on the feed item.
+     */
     private long reports;
+
+    /**
+     * Flag indicating whether the current user has "reported" the feed item.
+     */
     private boolean isReport;
-
-    public ReactionInfoDTO() {
-    }
-
-    public ReactionInfoDTO(long likes, boolean isLike, long dislikes, boolean isDislike, long shares, boolean isShare, long reports, boolean isReport) {
-        this.likes = likes;
-        this.isLike = isLike;
-        this.dislikes = dislikes;
-        this.isDislike = isDislike;
-        this.shares = shares;
-        this.isShare = isShare;
-        this.reports = reports;
-        this.isReport = isReport;
-    }
-
-    public long getLikes() {
-        return likes;
-    }
-
-    public void setLikes(long likes) {
-        this.likes = likes;
-    }
-
-    public boolean isLike() {
-        return isLike;
-    }
-
-    public void setLike(boolean like) {
-        isLike = like;
-    }
-
-    public long getDislikes() {
-        return dislikes;
-    }
-
-    public void setDislikes(long dislikes) {
-        this.dislikes = dislikes;
-    }
-
-    public boolean isDislike() {
-        return isDislike;
-    }
-
-    public void setDislike(boolean dislike) {
-        isDislike = dislike;
-    }
-
-    public long getShares() {
-        return shares;
-    }
-
-    public void setShares(long shares) {
-        this.shares = shares;
-    }
-
-    public boolean isShare() {
-        return isShare;
-    }
-
-    public void setShare(boolean share) {
-        isShare = share;
-    }
-
-    public long getReports() {
-        return reports;
-    }
-
-    public void setReports(long reports) {
-        this.reports = reports;
-    }
-
-    public boolean isReport() {
-        return isReport;
-    }
-
-    public void setReport(boolean report) {
-        isReport = report;
-    }
 }
