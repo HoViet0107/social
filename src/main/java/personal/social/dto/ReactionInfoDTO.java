@@ -24,7 +24,7 @@ public class ReactionInfoDTO {
     /**
      * Flag indicating whether the current user has "liked" the feed item.
      */
-    private boolean isLike;
+    private boolean userLiked;
 
     /**
      * The total number of "dislikes" reactions on the feed item.
@@ -34,7 +34,7 @@ public class ReactionInfoDTO {
     /**
      * Flag indicating whether the current user has "disliked" the feed item.
      */
-    private boolean isDislike;
+    private boolean userDisliked;
 
     /**
      * The total number of "shares" reactions on the feed item.
@@ -44,7 +44,7 @@ public class ReactionInfoDTO {
     /**
      * Flag indicating whether the current user has "shared" the feed item.
      */
-    private boolean isShare;
+    private boolean userShared;
 
     /**
      * The total number of "reports" reactions on the feed item.
@@ -54,5 +54,5 @@ public class ReactionInfoDTO {
     /**
      * Flag indicating whether the current user has "reported" the feed item.
      */
-    private boolean isReport;
+    private boolean userReported;
 }

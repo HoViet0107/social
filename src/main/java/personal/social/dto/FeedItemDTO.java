@@ -60,4 +60,14 @@ public class FeedItemDTO {
      * The ID of the parent feed item if it's a comment (null for posts).
      */
     private Long parentFItem;
+
+    /**
+     * The ID of the feed item if it's a comment or reply (null for posts).
+     */
+    private Long postId;
+
+    /**
+     *
+     */
+    private Long replyTo;
 }
