@@ -6,38 +6,79 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import personal.social.enums.ObjectType;
 
-@NamedStoredProcedureQuery(
-        name = "ReactionSummary.toggleReaction",
-        procedureName = "ToggleReaction",
-        parameters = {
-                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_user_id", type = Long.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_object_type", type = String.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_object_id", type = Long.class),
-                @StoredProcedureParameter(mode = ParameterMode.IN, name = "p_reaction_type", type = String.class)
-        }
-)
+/**
+ * Represents the aggregate summary of reactions (like, dislike, report, share)
+ * for a specific {@link FeedItem} (either a post or a comment).
+ *
+ * <p>This entity is used to efficiently store and query total reaction counts
+ * for each feed item without having to compute them dynamically from individual user reactions.</p>
+ *
+ * <p>Fields:
+ * <ul>
+ *   <li>{@code itemType} - The type of the associated item: POST or COMMENT.</li>
+ *   <li>{@code feedItem} - The associated {@link FeedItem} (either post or comment) to which the reactions apply.</li>
+ *   <li>{@code likes} - Total number of "like" reactions.</li>
+ *   <li>{@code dislikes} - Total number of "dislike" reactions.</li>
+ *   <li>{@code reports} - Total number of "report" reactions (usually for abuse or inappropriate content).</li>
+ *   <li>{@code shares} - Total number of times the content has been shared.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>This class is mapped to the database table {@code reaction_aggregate}.</p>
+ *
+ * @author
+ */
 @Entity
-@Table(name = "reaction_aggregate", indexes = {
-        @Index(name = "idx_aggregate_item", columnList = "item_type, feed_item_id")
-})
+@Table(name = "reaction_aggregate")
 @Data
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReactionSummary {
+    /**
+     * The unique identifier for this reaction summary record.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * The type of the object that received reactions.
+     * Can be POST, COMMENT, etc., as defined in {@link ObjectType}.
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "item_type")
-    private ObjectType itemType; // POST, COMMENT
+    private ObjectType itemType;
 
+    /**
+     * The feed item (either a post or a comment) to which these reaction counts are associated.
+     * This is a one-to-one mapping and is non-nullable.
+     */
     @OneToOne
-    @Column(name = "feed_item_id")
-    private FeedItem feedItem; // ID post or comment
+    @JoinColumn(name = "feed_item_id", referencedColumnName = "feed_item_id", nullable = false)
+    private FeedItem feedItem;
 
+    /**
+     * The total number of "like" reactions for the associated feed item.
+     * Initialized to 0 by default.
+     */
     private Long likes = 0L;
+
+    /**
+     * The total number of "dislike" reactions for the associated feed item.
+     * Initialized to 0 by default.
+     */
     private Long dislikes = 0L;
+
+    /**
+     * The total number of "report" actions indicating inappropriate or abusive content.
+     * Initialized to 0 by default.
+     */
     private Long reports = 0L;
+
+    /**
+     * The total number of "share" actions for the associated feed item.
+     * Initialized to 0 by default.
+     */
     private Long shares = 0L;
 
     public ReactionSummary(ObjectType itemType, FeedItem feedItem, Long likes, Long dislikes, Long reports, Long shares) {
@@ -49,4 +90,3 @@ public class ReactionSummary {
         this.shares = shares;
     }
 }
-
