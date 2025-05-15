@@ -5,10 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import personal.social.enums.ObjectType;
-import personal.social.enums.ReactionType;
 import personal.social.model.ReactionSummary;
-import personal.social.model.UserReaction;
 
 /**
  * Repository interface for managing reaction summaries

@@ -16,25 +16,21 @@ import java.util.List;
 @Repository
 public interface FeedItemRepository extends JpaRepository<FeedItem, Long> {
     /**
-     * Retrieves top-level feed items with pagination
-     * 
+     * Retrieves top-level feed items(post) with pagination
+     *
      * @param pageNumber The page number
-     * @param pageSize The page size
-     * @param fItemType The feed item type (POST, COMMENT)
-     * @param parentItemId The parent item ID (for comments)
+     * @param pageSize   The page size
      * @return List of feed items as Object arrays
      */
-    @Query(value = "CALL GetTopLevelFeedItems(:pageNumber, :pageSize, :fItemType, :parentItemId)", nativeQuery = true)
+    @Query(value = "CALL GetTopLevelFeedItems(:pageNumber, :pageSize)", nativeQuery = true)
     List<Object[]> findAllFeedItems(
             @Param("pageNumber") Integer pageNumber,
-            @Param("pageSize") Integer pageSize,
-            @Param("fItemType") String fItemType,
-            @Param("parentItemId") Long parentItemId
-            );
+            @Param("pageSize") Integer pageSize
+    );
 
     /**
      * Counts all feed items of a specific type
-     * 
+     *
      * @param fItemType The feed item type (POST, COMMENT)
      * @return The total count of feed items
      */
@@ -42,19 +38,46 @@ public interface FeedItemRepository extends JpaRepository<FeedItem, Long> {
     long countAllFeedItems(@Param("fItemType") String fItemType);
 
     /**
+     * Retrieves comments for a specific feed item with pagination
+     *
+     * @param pageNumber The page number
+     * @param pageSize The page size
+     * @param parentItemId The parent item ID
+     * @return List of comments as Object arrays
+     */
+    @Query(value = "CALL GetComments(:itemType,:postId, :parentItemId, :pageNumber, :pageSize)", nativeQuery = true)
+    List<Object[]> findAllCommentsByParentId(
+            @Param("itemType") String itemType,
+            @Param("postId") Long postId,
+            @Param("parentItemId") Long parentItemId,
+            @Param("pageNumber") Integer pageNumber,
+            @Param("pageSize") Integer pageSize
+    );
+
+    /**
+     * Counts comments for a specific feed item(parent feed item)
+     *
+     * @param parentItemId The parent item ID
+     * @return The total count of comments
+     */
+    @Query(value = "CALL CountParentItemComments(:parentItemId)", nativeQuery = true)
+    long countCommentsByParentId(@Param("parentItemId") Long parentItemId);
+
+    /**
      * Retrieves reaction information for a feed item
-     * 
+     *
      * @param feedItemId The feed item ID
      * @return Reaction information DTO
      */
-    @Query(value = "CALL GetFeedItemReactionInfo(:feedItemId)", nativeQuery = true)
+    @Query(value = "CALL GetFeedItemReactionInfo(:userId, :feedItemId)", nativeQuery = true)
     ReactionInfoDTO findFeedItemReactionInfo(
+            @Param("userId") Long userId,
             @Param("feedItemId") Long feedItemId
     );
 
     /**
      * Finds a feed item by its ID
-     * 
+     *
      * @param feedItemId The feed item ID
      * @return The feed item if found
      */

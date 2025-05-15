@@ -2,7 +2,6 @@ package personal.social.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import personal.social.enums.ObjectType;
 import personal.social.enums.ReactionType;
 import personal.social.model.UserReaction;
 
